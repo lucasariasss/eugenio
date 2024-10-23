@@ -2,7 +2,7 @@
 var wifiConnectInterval = null;
 var configuracion_boton = 0
 
-/* 2. FUNBCIONES DE INICIALIZACION.*/
+/* 2. FUNCIONES DE INICIALIZACION.*/
 $(document).ready(function(){
 	getSSID();
 	getConnectInfo();
