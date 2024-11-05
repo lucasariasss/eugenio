@@ -44,15 +44,18 @@ function switchConfig()
  */
 function send_uart(){
 	
-	selectedDisease = $('#selectedDis').val();
+	selectedDisease = parseInt($('#selectedDis').val()) + 1;
 	
 	$.ajax({
 		url: '/UARTmsg.json',
 		dataType: 'json',
 		method: 'POST',
 		cache: false,
-		headers: {'my-connect-ssid': selectedDisease},
-		data: {'timestamp': Date.now()}
+		headers: {'disease': selectedDisease},
+		data: {
+			'disease': selectedDisease,
+			'timestamp': Date.now()
+		}
 	});
 	
 }

@@ -16,10 +16,10 @@
 #include "tasks_common.h"
 #include "wifi_app.h"
 
-//tag usado para mensaje de la consola serie del ESP
+// Etiqueta utilizada para mensajes de la consola serial ESP
 static const char TAG[] = "http_server";
 
-// Wifi connect status
+// Estado de conexión WiFi
 static int g_wifi_connect_status = NONE;
 
 //gestor de tareas del servidor http
@@ -31,7 +31,7 @@ static TaskHandle_t task_http_server_monitor = NULL;
 // controlador de la cola usado para manipular la cola principal de eventos
 static QueueHandle_t http_server_monitor_queue_handle;
 
-//archivos embebidos: jquery, index.html, app.css, app.js, favicon.ico model.png y logo.png
+// archivos embebidos: jquery, index.html, app.css, app.js, favicon.ico model.png y logo.png
 extern const uint8_t jquery_3_3_1_min_js_start[] 	asm("_binary_jquery_3_3_1_min_js_start");
 extern const uint8_t jquery_3_3_1_min_js_end[] 		asm("_binary_jquery_3_3_1_min_js_end");
 extern const uint8_t index_html_start[] 			asm("_binary_index_html_start");
@@ -47,10 +47,12 @@ extern const uint8_t model_png_end[] 				asm("_binary_model_png_end");
 extern const uint8_t logo_png_start[] 				asm("_binary_logo_png_start");
 extern const uint8_t logo_png_end[] 				asm("_binary_logo_png_end");
 
-
 /**
- * monitor del servidor http usado para ubicar eventos del servidor http
- * @param pvParameter parameter que puede ser pasado a la tarea
+ * Esta función está destinada a monitorear el estado y el rendimiento del servidor HTTP
+ * para asegurar que el servidor esté operando correctamente.
+ *
+ * @param parameter Un puntero a los parámetros para la tarea de monitoreo. Esto puede ser
+ * utilizado para pasar información de configuración o estado a la tarea.
  */
 static void http_server_monitor(void *parameter)
 {
@@ -267,6 +269,20 @@ static esp_err_t http_server_wifi_connect_status_json_handler(httpd_req_t *req)
 	return ESP_OK;
 }
 
+static esp_err_t http_server_uart_msg_json_handler(httpd_req_t *req)
+{
+	ESP_LOGI(TAG, "/UARTmsg.json requested");
+
+	char uartMsgJSON[100];
+
+	sprintf(uartMsgJSON, "{\"msg\":\"%s\"}", "UART message received");
+
+	httpd_resp_set_type(req, "application/json");
+	httpd_resp_send(req, uartMsgJSON, strlen(uartMsgJSON));
+
+	return ESP_OK;
+}
+
 /*
  * wifiConnectInfo.json handler updates the webpage with the connection info.
  * @param req HTTP request for wich the uri needs to be handled
@@ -318,10 +334,17 @@ static esp_err_t http_server_wifi_disconnect_json_handler(httpd_req_t *req)
 	return ESP_OK;
 }
 
-/*
- * apSSID.json handler responds by sending the ap SSID.
- * @param req HTTP request for wich the uri needs to be handled
- * @return ESP_OK
+/**
+ * @brief Manejador HTTP GET para recuperar el SSID del Punto de Acceso en formato JSON.
+ *
+ * Esta función maneja las solicitudes HTTP GET para obtener el SSID del Punto de Acceso
+ * en formato JSON. Está destinada a ser utilizada como un manejador para el servidor HTTP.
+ *
+ * @param req Puntero a la estructura de solicitud HTTP.
+ * 
+ * @return
+ *     - ESP_OK: Si la solicitud fue manejada exitosamente y se envió la respuesta.
+ *     - ESP_FAIL: Si hubo un error al procesar la solicitud.
  */
 static esp_err_t http_server_get_ap_ssid_json_handler(httpd_req_t *req)
 {
