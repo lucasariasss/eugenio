@@ -16,7 +16,7 @@
 #include "tasks_common.h"
 #include "wifi_app.h"
 
-// Etiqueta utilizada para mensajes de la consola serial ESP
+// Etiqueta utilizada para mensajes del monitor serie
 static const char TAG[] = "http_server";
 
 // Estado de conexión WiFi
@@ -47,6 +47,21 @@ extern const uint8_t model_png_end[] 				asm("_binary_model_png_end");
 extern const uint8_t logo_png_start[] 				asm("_binary_logo_png_start");
 extern const uint8_t logo_png_end[] 				asm("_binary_logo_png_end");
 
+/***************MONITOR***************/
+/**
+ * @brief Actualiza el mensaje de estado de la conexión WiFi.
+ *
+ * Esta función actualiza el estado de la conexión WiFi con un mensaje y estado dados.
+ *
+ * @param message Un puntero a un string que contiene el mensaje de estado.
+ * @param status El estado de la conexión WiFi del tipo http_server_wifi_connect_status_e.
+ */
+static void http_server_update_wifi_connect_status(char *message, http_server_wifi_connect_status_e status)
+{
+	ESP_LOGI(TAG, "%s", message);
+	g_wifi_connect_status = status;
+}
+
 /**
  * Esta función está destinada a monitorear el estado y el rendimiento del servidor HTTP
  * para asegurar que el servidor esté operando correctamente.
@@ -65,28 +80,20 @@ static void http_server_monitor(void *parameter)
 			switch(msg.msgID)
 			{
 				case HTTP_MSG_WIFI_CONNECT_INIT:
-					ESP_LOGI(TAG, "HTTP_MSG_WIFI_CONNECT_INIT");
-
-					g_wifi_connect_status = HTTP_WIFI_STATUS_CONNECTING;
+					http_server_update_wifi_connect_status("HTTP_MSG_WIFI_CONNECT_INIT", HTTP_WIFI_STATUS_CONNECTING);
 				break;
 
 				case HTTP_MSG_WIFI_CONNECT_SUCCESS:
-					ESP_LOGI(TAG, "HTTP_MSG_WIFI_CONNECT_SUCCESS");
-
-					g_wifi_connect_status = HTTP_WIFI_STATUS_CONNECT_SUCCESS;
+					http_server_update_wifi_connect_status("HTTP_MSG_WIFI_CONNECT_SUCCESS", HTTP_WIFI_STATUS_CONNECT_SUCCESS);
 
 				break;
 
 				case HTTP_MSG_WIFI_CONNECT_FAIL:
-					ESP_LOGI(TAG, "HTTP_MSG_WIFI_CONNECT_FAIL");
-
-					g_wifi_connect_status = HTTP_WIFI_STATUS_CONNECT_FAILED;
+					http_server_update_wifi_connect_status("HTTP_MSG_WIFI_CONNECT_FAIL", HTTP_WIFI_STATUS_CONNECT_FAILED);
 				break;
 
 				case HTTP_MSG_WIFI_USER_DISCONNECT:
-					ESP_LOGI(TAG, "HTTP_MSG_WIFI_USER_DISCONNECT");
-
-					g_wifi_connect_status = HTTP_WIFI_STATUS_DISCONNECTED;
+					http_server_update_wifi_connect_status("HTTP_MSG_WIFI_USER_DISCONNECT", HTTP_WIFI_STATUS_DISCONNECTED);
 				break;
 
 				default:
@@ -97,110 +104,28 @@ static void http_server_monitor(void *parameter)
 }
 
 /*CONTROLADORES GET*/
-/**
- * jquery solicitado al acceder a la pagina web
- * @param req pedido HTTP que necesita ser controlado por la uri
- * @return ESP_OK
- */
-static esp_err_t http_server_jquery_handler(httpd_req_t *req)
+static esp_err_t http_server_static_handler(httpd_req_t *req, const char *type, const char *start, const char *end)
 {
-	ESP_LOGI(TAG, "JQuery requested");
+    ESP_LOGI(TAG, "%s requested", req->uri);
 
-	httpd_resp_set_type(req, "application/javascript");
-	httpd_resp_send(req, (const char *)jquery_3_3_1_min_js_start, jquery_3_3_1_min_js_end - jquery_3_3_1_min_js_start);
+    httpd_resp_set_type(req, type);
+    httpd_resp_send(req, start, end - start);
 
-	return ESP_OK;
+    return ESP_OK;
 }
 
-/**
- * index.html solicitado al acceder a la pagina web
- * @param req pedido HTTP que necesita ser controlado por la uri
- * @return ESP_OK
- */
-static esp_err_t http_server_index_html_handler(httpd_req_t *req)
-{
-	ESP_LOGI(TAG, "index.html requested");
+#define DEFINE_STATIC_HANDLER(name, type, start, end) \
+    static esp_err_t name(httpd_req_t *req) { \
+        return http_server_static_handler(req, type, (const char *)start, (const char *)end); \
+    }
 
-	httpd_resp_set_type(req, "text/html");
-	httpd_resp_send(req, (const char *)index_html_start, index_html_end - index_html_start);
-
-	return ESP_OK;
-}
-
-/**
- * app.css solicitado al acceder a la pagina web
- * @param req pedido HTTP que necesita ser controlado por la uri
- * @return ESP_OK
- */
-static esp_err_t http_server_app_css_handler(httpd_req_t *req)
-{
-	ESP_LOGI(TAG, "app.css requested");
-
-	httpd_resp_set_type(req, "text/css");
-	httpd_resp_send(req, (const char *)app_css_start, app_css_end - app_css_start);
-
-	return ESP_OK;
-}
-
-/**
- * app.js solicitado al acceder a la pagina web
- * @param req pedido HTTP que necesita ser controlado por la uri
- * @return ESP_OK
- */
-static esp_err_t http_server_app_js_handler(httpd_req_t *req)
-{
-	ESP_LOGI(TAG, "app.js requested");
-
-	httpd_resp_set_type(req, "application/javascript");
-	httpd_resp_send(req, (const char *)app_js_start, app_js_end - app_js_start);
-
-	return ESP_OK;
-}
-
-/**
- * favicon.ico solicitado al acceder a la pagina web
- * @param req pedido HTTP que necesita ser controlado por la uri
- * @return ESP_OK
- */
-static esp_err_t http_server_favicon_ico_handler(httpd_req_t *req)
-{
-	ESP_LOGI(TAG, "favicon.ico requested");
-
-	httpd_resp_set_type(req, "image/x-icon");
-	httpd_resp_send(req, (const char *)favicon_ico_start, favicon_ico_end - favicon_ico_start);
-
-	return ESP_OK;
-}
-
-/**
- * model.png solicitado al acceder a la pagina web
- * @param req pedido HTTP que necesita ser controlado por la uri
- * @return ESP_OK
- */
-static esp_err_t http_server_model_png_handler(httpd_req_t *req)
-{
-	ESP_LOGI(TAG, "model.png requested");
-
-	httpd_resp_set_type(req, "image/x-icon");
-	httpd_resp_send(req, (const char *)model_png_start, model_png_end - model_png_start);
-
-	return ESP_OK;
-}
-
-/**
- * logo.png solicitado al acceder a la pagina web
- * @param req pedido HTTP que necesita ser controlado por la uri
- * @return ESP_OK
- */
-static esp_err_t http_server_logo_png_handler(httpd_req_t *req)
-{
-	ESP_LOGI(TAG, "logo.png requested");
-
-	httpd_resp_set_type(req, "image/x-icon");
-	httpd_resp_send(req, (const char *)logo_png_start, logo_png_end - logo_png_start);
-
-	return ESP_OK;
-}
+DEFINE_STATIC_HANDLER(http_server_jquery_handler, "application/javascript", jquery_3_3_1_min_js_start, jquery_3_3_1_min_js_end)
+DEFINE_STATIC_HANDLER(http_server_index_html_handler, "text/html", index_html_start, index_html_end)
+DEFINE_STATIC_HANDLER(http_server_app_css_handler, "text/css", app_css_start, app_css_end)
+DEFINE_STATIC_HANDLER(http_server_app_js_handler, "application/javascript", app_js_start, app_js_end)
+DEFINE_STATIC_HANDLER(http_server_favicon_ico_handler, "image/x-icon", favicon_ico_start, favicon_ico_end)
+DEFINE_STATIC_HANDLER(http_server_model_png_handler, "image/x-icon", model_png_start, model_png_end)
+DEFINE_STATIC_HANDLER(http_server_logo_png_handler, "image/x-icon", logo_png_start, logo_png_end)
 
 /*
  * wifiConnect.json handle is invoked after the connect button is pressed
@@ -271,15 +196,28 @@ static esp_err_t http_server_wifi_connect_status_json_handler(httpd_req_t *req)
 
 static esp_err_t http_server_uart_msg_json_handler(httpd_req_t *req)
 {
+	esp_err_t ret = ESP_OK;
 	ESP_LOGI(TAG, "/UARTmsg.json requested");
 
 	char uartMsgJSON[100];
+	memset(uartMsgJSON, 0, sizeof(uartMsgJSON));
+
+	char disease[IP4ADDR_STRLEN_MAX];
+
+	
+
+	ESP_LOGI(TAG, "UART message received");
+	ESP_LOGI(TAG, "The message is: %s", uartMsgJSON);
 
 	sprintf(uartMsgJSON, "{\"msg\":\"%s\"}", "UART message received");
 
 	httpd_resp_set_type(req, "application/json");
-	httpd_resp_send(req, uartMsgJSON, strlen(uartMsgJSON));
-
+	ret = httpd_resp_send(req, uartMsgJSON, strlen(uartMsgJSON));
+	if (ret != ESP_OK)
+	{
+		ESP_LOGE(TAG, "httpd_resp_send failed with error: %s", esp_err_to_name(ret));
+	}
+	
 	return ESP_OK;
 }
 
@@ -364,11 +302,32 @@ static esp_err_t http_server_get_ap_ssid_json_handler(httpd_req_t *req)
 	return ESP_OK;
 }
 
+/************** CONFIGURAR SERVIDOR **************/
+
+/**
+ * @brief Registra un manejador para una URI específica.
+ * 
+ * Esta función registra un manejador para una URI específica y un método HTTP con la instancia del servidor HTTP proporcionada.
+ *
+ * @param uri La URI para la cual se va a registrar el manejador.
+ * @param method El método HTTP (por ejemplo, GET, POST) para el cual se va a registrar el manejador.
+ * @param handler El puntero a la función del manejador que será llamada cuando se solicite la URI y el método especificados.
+ */
+static void http_server_register_uri_handler(const char *uri, httpd_method_t method, esp_err_t (*handler)(httpd_req_t *r))
+{
+    httpd_uri_t uri_handler = {
+        .uri = uri,
+        .method = method,
+        .handler = handler,
+        .user_ctx = NULL
+    };
+    httpd_register_uri_handler(http_server_handle, &uri_handler);
+}
+
 /**
  * setea la configuracion predeterminada del servidor html
  * @return si la configuracion fue exitosa, devuelve la instancia del servidor http, sino NULL
  */
-
 static httpd_handle_t http_server_configure(void)
 {
 	//generar configuracion predeterminada
@@ -391,129 +350,26 @@ static httpd_handle_t http_server_configure(void)
 			config.server_port, config.task_priority);
 
 	//comenzar el servidor httpd
-	if(httpd_start(&http_server_handle, &config) == ESP_OK)
-	{
-		ESP_LOGI(TAG, "http_server_configure: Registering URI handlers");
+    if(httpd_start(&http_server_handle, &config) == ESP_OK)
+    {
+        ESP_LOGI(TAG, "http_server_configure: Registering URI handlers");
 
-		//registrar el gestor de JQuery
-		httpd_uri_t jquery_js = {
-				.uri = "/jquery-3.3.1.min.js",
-				.method = HTTP_GET,
-				.handler = http_server_jquery_handler,
-				.user_ctx = NULL
-		};
-		httpd_register_uri_handler(http_server_handle, &jquery_js);
+        http_server_register_uri_handler("/jquery-3.3.1.min.js", HTTP_GET, http_server_jquery_handler);
+        http_server_register_uri_handler("/", HTTP_GET, http_server_index_html_handler);
+        http_server_register_uri_handler("/app.css", HTTP_GET, http_server_app_css_handler);
+        http_server_register_uri_handler("/app.js", HTTP_GET, http_server_app_js_handler);
+        http_server_register_uri_handler("/favicon.ico", HTTP_GET, http_server_favicon_ico_handler);
+        http_server_register_uri_handler("/model.png", HTTP_GET, http_server_model_png_handler);
+        http_server_register_uri_handler("/logo.png", HTTP_GET, http_server_logo_png_handler);
+        http_server_register_uri_handler("/UARTmsg.json", HTTP_POST, http_server_uart_msg_json_handler);
+        http_server_register_uri_handler("/wifiConnect.json", HTTP_POST, http_server_wifi_connect_json_handler);
+        http_server_register_uri_handler("/wifiConnectStatus", HTTP_POST, http_server_wifi_connect_status_json_handler);
+        http_server_register_uri_handler("/wifiConnectInfo.json", HTTP_GET, http_server_get_wifi_connect_info_json_handler);
+        http_server_register_uri_handler("/wifiDisconnect.json", HTTP_DELETE, http_server_wifi_disconnect_json_handler);
+        http_server_register_uri_handler("/apSSID.json", HTTP_GET, http_server_get_ap_ssid_json_handler);
 
-		//registrar el gestor de index.html
-		httpd_uri_t index_html = {
-				.uri = "/",
-				.method = HTTP_GET,
-				.handler = http_server_index_html_handler,
-				.user_ctx = NULL
-		};
-		httpd_register_uri_handler(http_server_handle, &index_html);
-
-		//registrar el gestor de app.css
-		httpd_uri_t app_css = {
-				.uri = "/app.css",
-				.method = HTTP_GET,
-				.handler = http_server_app_css_handler,
-				.user_ctx = NULL
-		};
-		httpd_register_uri_handler(http_server_handle, &app_css);
-
-		//registrar el gestor de app.css
-		httpd_uri_t app_js = {
-				.uri = "/app.js",
-				.method = HTTP_GET,
-				.handler = http_server_app_js_handler,
-				.user_ctx = NULL
-		};
-		httpd_register_uri_handler(http_server_handle, &app_js);
-
-		//registrar el gestor de app.css
-		httpd_uri_t favicon_ico = {
-				.uri = "/favicon.ico",
-				.method = HTTP_GET,
-				.handler = http_server_favicon_ico_handler,
-				.user_ctx = NULL
-		};
-		httpd_register_uri_handler(http_server_handle, &favicon_ico);
-
-		//registrar el gestor de model.png
-		httpd_uri_t model_png = {
-				.uri = "/model.png",
-				.method = HTTP_GET,
-				.handler = http_server_model_png_handler,
-				.user_ctx = NULL
-		};
-		httpd_register_uri_handler(http_server_handle, &model_png);
-
-		//registrar el gestor de model.png
-		httpd_uri_t logo_png = {
-				.uri = "/logo.png",
-				.method = HTTP_GET,
-				.handler = http_server_logo_png_handler,
-				.user_ctx = NULL
-		};
-		httpd_register_uri_handler(http_server_handle, &logo_png);
-
-		// register UARTmsg.json handler
-		httpd_uri_t uart_msg_json = {
-				.uri = "/UARTmsg.json",
-				.method = HTTP_POST,
-				.handler = http_server_uart_msg_json_handler,
-				.user_ctx = NULL
-		};
-		httpd_register_uri_handler(http_server_handle, &uart_msg_json);
-
-		// register wifiConnect.json handler
-		httpd_uri_t wifi_connect_json = {
-				.uri = "/wifiConnect.json",
-				.method = HTTP_POST,
-				.handler = http_server_wifi_connect_json_handler,
-				.user_ctx = NULL
-		};
-		httpd_register_uri_handler(http_server_handle, &wifi_connect_json);
-
-		// register wifiConnectStatus.json handler
-		httpd_uri_t wifi_connect_status_json = {
-				.uri = "/wifiConnectStatus",
-				.method = HTTP_POST,
-				.handler = http_server_wifi_connect_status_json_handler,
-				.user_ctx = NULL
-		};
-		httpd_register_uri_handler(http_server_handle, &wifi_connect_status_json);
-
-		// register wifiConnectInfo.json handler
-		httpd_uri_t wifi_connect_info_json = {
-				.uri = "/wifiConnectInfo.json",
-				.method = HTTP_GET,
-				.handler = http_server_get_wifi_connect_info_json_handler,
-				.user_ctx = NULL
-		};
-		httpd_register_uri_handler(http_server_handle, &wifi_connect_info_json);
-
-		// register wifiDisonnect.json handler
-		httpd_uri_t wifi_disconnect_json = {
-				.uri = "/wifiDisconnect.json",
-				.method = HTTP_DELETE,
-				.handler = http_server_wifi_disconnect_json_handler,
-				.user_ctx = NULL
-		};
-		httpd_register_uri_handler(http_server_handle, &wifi_disconnect_json);
-
-		// register apSSID.json handler
-		httpd_uri_t ap_ssid_json = {
-				.uri = "/apSSID.json",
-				.method = HTTP_GET,
-				.handler = http_server_get_ap_ssid_json_handler,
-				.user_ctx = NULL
-		};
-		httpd_register_uri_handler(http_server_handle, &ap_ssid_json);
-
-		return http_server_handle;
-	}
+        return http_server_handle;
+    }
 
 	return NULL;
 }

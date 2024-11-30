@@ -12,7 +12,7 @@
 #include "esp_wifi_types.h"
 #include "freertos/FreeRTOS.h"
 
-// Callback typedef
+// Definición de tipo para el callback
 typedef void (*wifi_connected_event_callback_t)(void);
 
 //CONFIGURACION DE APLICACION WIFI
@@ -67,23 +67,23 @@ BaseType_t wifi_app_send_message(wifi_app_message_e msgID);
 void wifi_app_start(void);
 
 /**
- * Gets the wifi configuration
+ * Obtiene la configuración de wifi
  */
 wifi_config_t* wifi_app_get_wifi_config(void);
 
 /**
- * Sets callback function
+ * Establece la función de callback
  */
 void wifi_app_set_callback(wifi_connected_event_callback_t cb);
 
 /*
- * Calls the callback function
+ * Llama a la función de callback
  */
 void wifi_app_call_callback(void);
 
 /*
- * Gets the RSSI value of the WiFi connection.
- * @return current RSSI level
+ * Obtiene el valor RSSI de la conexión WiFi.
+ * @return nivel actual de RSSI
  */
 int8_t wifi_app_get_rssi(void);
 

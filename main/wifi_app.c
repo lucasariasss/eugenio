@@ -22,17 +22,17 @@
 // tag para mensajes en monitor serie
 static const char TAG [] = "wifi_app";
 
-// WiFi application callback
+// Callback de la aplicación WiFi
 static wifi_connected_event_callback_t wifi_connected_event_cb;
 
-// Used for returning the wifi configuration
+// Usado para devolver la configuración wifi
 wifi_config_t *wifi_config = NULL;
 
-// Used to track the number for retries when a connection attempt fails
+// Usado para rastrear el número de reintentos cuando un intento de conexión falla
 static int g_retry_number;
 
 /*
- * Wifi application event group handle and status bit
+ * Manejador del grupo de eventos de la aplicación WiFi y bit de estado
  */
 static EventGroupHandle_t wifi_app_event_group;
 const int WIFI_APP_CONNECTING_USING_SAVED_CREDS_BIT			= BIT0;
@@ -190,7 +190,7 @@ static void wifi_app_soft_ap_config(void)
 }
 
 /*
- * Connects the ESP32 to an external AP using the updated station configuration
+ * Conecta el ESP32 a un AP externo usando la configuración de estación actualizada
  */
 static void wifi_app_connect_sta(void)
 {
@@ -198,10 +198,9 @@ static void wifi_app_connect_sta(void)
 	ESP_ERROR_CHECK(esp_wifi_connect());
 }
 
-/* tarea principal de la aplicacion wifi
-*  @param pvParameters parametro que puede ser pasado a la tarea
+/* 	tarea principal de la aplicacion wifi
+*	@param pvParameters parametro que puede ser pasado a la tarea
 */
-
 static void wifi_app_task(void *pvParameters)
 {
 	wifi_app_queue_message_t msg;
@@ -242,7 +241,7 @@ static void wifi_app_task(void *pvParameters)
 						ESP_LOGI(TAG, "Unable to load station configuration");
 					}
 
-					// Next, start the web server
+					// A continuación, iniciar el servidor web
 					wifi_app_send_message(WIFI_APP_MSG_START_HTTP_SERVER);
 
 					break;
@@ -259,13 +258,13 @@ static void wifi_app_task(void *pvParameters)
 
 					xEventGroupSetBits(wifi_app_event_group, WIFI_APP_CONNECTING_FROM_HTTP_SERVER_BIT);
 
-					// Attempt the connection
+					// Intentar la conexión
 					wifi_app_connect_sta();
 
-					// Set current number of retries to zero
+					// Establecer el número actual de reintentos a cero
 					g_retry_number = 0;
 
-					// Let the HTTP server know about the connection attempt
+					// Informar al servidor HTTP sobre el intento de conexión
 					http_server_monitor_send_message(HTTP_MSG_WIFI_CONNECT_INIT);
 
 					break;
@@ -278,7 +277,7 @@ static void wifi_app_task(void *pvParameters)
 					http_server_monitor_send_message(HTTP_MSG_WIFI_CONNECT_SUCCESS);
 
 					eventBits = xEventGroupGetBits(wifi_app_event_group);
-					if (eventBits & WIFI_APP_CONNECTING_USING_SAVED_CREDS_BIT) // Save STA creds only if connecting from the http server (not loaded from NVS)
+					if (eventBits & WIFI_APP_CONNECTING_USING_SAVED_CREDS_BIT) // Guardar credenciales STA solo si se conecta desde el servidor HTTP (no cargadas desde NVS)
 					{
 						xEventGroupClearBits(wifi_app_event_group, WIFI_APP_CONNECTING_USING_SAVED_CREDS_BIT);
 					}
@@ -292,7 +291,7 @@ static void wifi_app_task(void *pvParameters)
 						xEventGroupClearBits(wifi_app_event_group, WIFI_APP_CONNECTING_FROM_HTTP_SERVER_BIT);
 					}
 
-					// Check for connection callback
+					// Verificar la devolución de llamada de conexión
 					if (wifi_connected_event_cb)
 					{
 						wifi_app_call_callback();
@@ -392,6 +391,10 @@ int8_t wifi_app_get_rssi(void)
 	return wifi_data.rssi;
 }
 
+/**
+ * Esta función inicializa y arranca la aplicación WiFi, configurando
+ * las configuraciones necesarias y comenzando el proceso de conexión WiFi.
+ */
 void wifi_app_start(void)
 {
 	ESP_LOGI(TAG, "STARTING WIFI APPLICATION");
@@ -399,14 +402,14 @@ void wifi_app_start(void)
 	// inabilitar el mensaje predeterminado de wifi logging
 	esp_log_level_set("wifi", ESP_LOG_NONE);
 
-	// Allocate memory for the wifi configuration
+	// Asignar memoria para la configuración wifi
 	wifi_config = (wifi_config_t*)malloc(sizeof(wifi_config_t));
 	memset(wifi_config, 0x00, sizeof(wifi_config_t));
 
 	// Crear cola de mensajes
 	wifi_app_queue_handle = xQueueCreate(3, sizeof(wifi_app_queue_message_t));
 
-	// Create Wifi application event group
+	// Crear grupo de eventos de la aplicación Wifi
 	wifi_app_event_group = xEventGroupCreate();
 
 	// iniciar task de wifi

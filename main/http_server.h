@@ -8,10 +8,6 @@
 #ifndef MAIN_HTTP_SERVER_H_
 #define MAIN_HTTP_SERVER_H_
 
-#define OTA_UPDATE_PENDING 		0
-#define OTA_UPDATE_SUCCESSFUL 	1
-#define OTA_UPDATE_FAILED		-1
-
 /*
  * Connection status for wifi
  */
