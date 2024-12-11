@@ -11,6 +11,7 @@
 #include "esp_wifi.h"
 #include "esp_timer.h"
 #include "sys/param.h"
+#include <cJSON.h>
 
 #include "http_server.h"
 #include "tasks_common.h"
@@ -30,6 +31,9 @@ static TaskHandle_t task_http_server_monitor = NULL;
 
 // controlador de la cola usado para manipular la cola principal de eventos
 static QueueHandle_t http_server_monitor_queue_handle;
+
+// Definicion de la enfermerdad que se enviara por UART
+cJSON *DISEASE;
 
 // archivos embebidos: jquery, index.html, app.css, app.js, favicon.ico model.png y logo.png
 extern const uint8_t jquery_3_3_1_min_js_start[] 	asm("_binary_jquery_3_3_1_min_js_start");
@@ -196,29 +200,65 @@ static esp_err_t http_server_wifi_connect_status_json_handler(httpd_req_t *req)
 
 static esp_err_t http_server_uart_msg_json_handler(httpd_req_t *req)
 {
-	esp_err_t ret = ESP_OK;
-	ESP_LOGI(TAG, "/UARTmsg.json requested");
+    ESP_LOGI(TAG, "/UARTmsg.json requested");
 
-	char uartMsgJSON[100];
-	memset(uartMsgJSON, 0, sizeof(uartMsgJSON));
+    char content[100];
+    int ret, remaining = req->content_len;
 
-	char disease[IP4ADDR_STRLEN_MAX];
+    if (remaining >= sizeof(content)) {
+        ESP_LOGE(TAG, "Content too long");
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Content too long");
+        return ESP_FAIL;
+    }
 
-	
+    ret = httpd_req_recv(req, content, remaining);
+    if (ret <= 0) {
+        ESP_LOGE(TAG, "Failed to receive content");
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to receive content");
+        return ESP_FAIL;
+    }
 
-	ESP_LOGI(TAG, "UART message received");
-	ESP_LOGI(TAG, "The message is: %s", uartMsgJSON);
+    // Parse the JSON
+    cJSON *json = cJSON_Parse(content);
+    if (json == NULL) {
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL) {
+            ESP_LOGE(TAG, "Error before: %s", error_ptr);
+        } else {
+            ESP_LOGE(TAG, "Unknown error parsing JSON.");
+        }
+        return ESP_FAIL;
+    }
 
-	sprintf(uartMsgJSON, "{\"msg\":\"%s\"}", "UART message received");
+    // Print the JSON to the console
+    char *json_string = cJSON_Print(json);
+    if (json_string == NULL) {
+        ESP_LOGE(TAG, "Failed to print JSON");
+        cJSON_Delete(json);
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to print JSON");
+        return ESP_FAIL;
+    }
+    ESP_LOGI(TAG, "Received JSON: %s", json_string);
 
-	httpd_resp_set_type(req, "application/json");
-	ret = httpd_resp_send(req, uartMsgJSON, strlen(uartMsgJSON));
-	if (ret != ESP_OK)
-	{
-		ESP_LOGE(TAG, "httpd_resp_send failed with error: %s", esp_err_to_name(ret));
-	}
-	
-	return ESP_OK;
+	DISEASE = cJSON_GetObjectItem(json, "disease");
+    if (DISEASE != NULL)
+    {
+        ESP_LOGI(TAG, "'disease': %d", DISEASE->valueint);
+    }
+    else
+    {
+        ESP_LOGE(TAG, "\"disease\" not found");
+    }
+
+    // Clean up
+    cJSON_free(json_string);
+    cJSON_Delete(json);
+
+    // Send a response
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_send(req, "{\"status\":\"success\"}", HTTPD_RESP_USE_STRLEN);
+
+    return ESP_OK;
 }
 
 /*

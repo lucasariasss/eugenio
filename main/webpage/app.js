@@ -43,21 +43,17 @@ function switchConfig()
  * 4.0.1. Manda la opcion seleccionada a la STM32
  */
 function send_uart(){
-	
-	selectedDisease = parseInt($('#selectedDis').val()) + 1;
-	
+	const selectedDisease = parseInt($('#selectedDis').val()) + 1;
+	const data = JSON.stringify({ disease: selectedDisease, timestamp: Date.now() });
+
 	$.ajax({
 		url: '/UARTmsg.json',
 		dataType: 'json',
 		method: 'POST',
 		cache: false,
-		headers: {'disease': selectedDisease},
-		data: {
-			'disease': selectedDisease,
-			'timestamp': Date.now()
-		}
+		contentType: 'application/json',
+		data: data
 	});
-	
 }
 
 /* 5.0. FUNCIONES EN EL MENU DE CONECCION*/
