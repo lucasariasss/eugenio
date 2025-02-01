@@ -8,6 +8,9 @@
 #ifndef MAIN_HTTP_SERVER_H_
 #define MAIN_HTTP_SERVER_H_
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
+
 /*
  * Connection status for wifi
  */
