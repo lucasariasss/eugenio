@@ -16,6 +16,7 @@
 #include "http_server.h"
 #include "tasks_common.h"
 #include "wifi_app.h"
+#include "uart_Handle.h"
 
 // Etiqueta utilizada para mensajes del monitor serie
 static const char TAG[] = "http_server";
@@ -243,11 +244,16 @@ static esp_err_t http_server_uart_msg_json_handler(httpd_req_t *req)
 	DISEASE = cJSON_GetObjectItem(json, "disease");
     if (DISEASE != NULL)
     {
-        ESP_LOGI(TAG, "'disease': %d", DISEASE->valueint);
+		ESP_LOGI(TAG, "Enviando %d", DISEASE->valueint);
+		uart_Handle_send_message(DISEASE->valueint);
     }
     else
     {
-        ESP_LOGE(TAG, "\"disease\" not found");
+        ESP_LOGE(TAG, "DISEASE esta definida como NULL");
+		httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "DISEASE is NULL");
+		cJSON_Delete(json);
+		cJSON_free(json_string);
+		return ESP_FAIL;
     }
 
     // Clean up

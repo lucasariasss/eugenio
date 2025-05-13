@@ -11,9 +11,9 @@
 #include <cJSON.h>
 
 
-void uart_Handle_init(void);
+esp_err_t uart_Handle_init(void);
 
-void uart_Handle_send_message(cJSON *message);
+void uart_Handle_send_message(int disease);
 
 
 #endif /* MAIN_UARTHANDLE_H_ */

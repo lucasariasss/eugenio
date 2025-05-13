@@ -23,5 +23,11 @@
 #define HTTP_SERVER_MONITOR_PRIORITY		3
 #define HTTP_SERVER_MONITOR_CORE_ID			0
 
+//tasks de el controlador de uart
+#define BOOTLOADER_UART                     0
+#define UART_HANDLE_TASK_STACK_SIZE			1024
+#define UART_HANDLE_TASK_PRIORITY           5
+#define UART_HANDLE_TASK_CORE_ID			0
+
 
 #endif /* MAIN_TASKS_COMMON_H_ */
