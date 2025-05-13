@@ -51,8 +51,9 @@ void uart_Handle_send_message(int disease)
     if (disease != 0)
     {
         bzero(data, sizeof(int));
-        ESP_LOGI(TAG, "uart_Handle_send_message: Enviando mensaje por UART: %d", disease);
-        snprintf((char *)data, sizeof(int), "%d", disease);
+        char chardisease = disease;
+        ESP_LOGI(TAG, "uart_Handle_send_message: Enviando mensaje por UART: %x", disease);
+        snprintf((char *)data, sizeof(int), "%c", chardisease);
         int bytes_written = uart_write_bytes(UART_NUM, (const char *)data, strlen((char *)data));
         if (bytes_written < 0) {
             ESP_LOGE(TAG, "uart_Handle_send_message: Error enviando mensaje");
