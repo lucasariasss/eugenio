@@ -1,5 +1,5 @@
 /*
- * uart_Handle.h
+ * uart_app.h
  *
  *  Created on: 8 sep. 2024
  *      Author: arias

@@ -1,5 +1,5 @@
 /*
- * uart_Handle.c
+ * uart_app.c
  *
  *  Created on: 8 sep. 2024
  *      Author: arias
@@ -19,11 +19,11 @@
 #include "driver/uart.h"
 #include "driver/gpio.h"
 
-#include "uart_Handle.h"
+#include "uart_app.h"
 #include "http_server.h"
 #include "tasks_common.h"
 
-static const char TAG[] = "uart_Handle";
+static const char TAG[] = "uart_app";
 
 #if defined(BOOTLOADER_UART) && (BOOTLOADER_UART == 1)
 #define TXD_PIN (GPIO_NUM_1)

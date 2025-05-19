@@ -32,8 +32,8 @@
 //release macros (para la release todos tienen que estar en 1)
 #define RELEASE                             0
 #if defined (RELEASE) && (RELEASE == 1)
-#define HIDE_VERBOSE                        1 // activa el log de la aplicacion
-#define UARTS                               1 // si esta en uno es que se habilita el uso de la uart num 
+#define HIDE_LOGS // activa el log de la aplicacion
+#define UARTS     // si esta en uno es que se habilita el uso de la uart num 
 #endif //RELEASE         
 
 #endif /* MAIN_TASKS_COMMON_H_ */
