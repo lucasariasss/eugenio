@@ -1,13 +1,13 @@
 # Proyecto ESP32 con interfaz web
 
-Este repositorio contiene una aplicaci\u00f3n para ESP32 basada en **ESP-IDF**. El firmware arranca como punto de acceso y expone una peque\u00f1a p\u00e1gina web desde la cual se puede configurar la red WiFi y enviar comandos por UART a otro microcontrolador.
+Este repositorio contiene una aplicación para ESP32 basada en **ESP-IDF**. El firmware arranca como punto de acceso y expone una pequeña página web desde la cual se puede configurar la red WiFi y enviar comandos por UART a otro microcontrolador.
 
-## Caracter\u00edsticas
+## Características
 
-- Arranque inicial en modo **Access Point** (`Eugenio_AP`) para facilitar la configuraci\u00f3n.
+- Arranque inicial en modo **Access Point** (`Eugenio_AP`) para facilitar la configuración.
 - Servidor HTTP integrado que sirve la interfaz web ubicada en `main/webpage/`.
 - Posibilidad de conectarse a una red WiFi en modo **Station**, guardando las credenciales en NVS.
-- Envi\u00f3 de un byte por UART con la patolog\u00eda seleccionada en la web.
+- Envió de un byte por UART con la patología seleccionada en la web.
 - Tareas FreeRTOS dedicadas para WiFi, HTTP y UART.
 - Contenedor de desarrollo basado en Docker para reproducir el entorno de ESP-IDF y QEMU.
 
@@ -19,10 +19,10 @@ main/
     main.c          - Punto de entrada
     wifi_app.*      - Manejo de WiFi y eventos
     http_server.*   - Servidor web y API REST
-    uart_app.*      - Env\u00edo de comandos por UART
+    uart_app.*      - Envío de comandos por UART
     app_nvs.*       - Almacenamiento de credenciales
     tasks_common.h  - Definiciones de tareas
-    webpage/        - Archivos HTML, CSS, JS e im\u00e1genes
+    webpage/        - Archivos HTML, CSS, JS e imágenes
 .devcontainer/      - Archivos para VS Code y Docker
 ```
 
@@ -33,7 +33,7 @@ main/
 
 Opcionalmente se puede usar el contenedor que se encuentra en `.devcontainer` para evitar instalaciones manuales.
 
-## Compilaci\u00f3n r\u00e1pida
+## Compilación rápida
 
 ```bash
 idf.py set-target esp32
@@ -46,4 +46,4 @@ Si se utiliza el contenedor, estas instrucciones se ejecutan dentro de la termin
 
 ## Licencia
 
-El c\u00f3digo est\u00e1 disponible bajo dominio p\u00fablico (o CC0, a elecci\u00f3n) seg\u00fan el archivo [LICENSE](LICENSE).
+El código está disponible bajo dominio público (o CC0, a elección) según el archivo [LICENSE](LICENSE).
