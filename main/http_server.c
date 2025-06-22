@@ -170,7 +170,7 @@ static esp_err_t http_server_wifi_connect_json_handler(httpd_req_t *req)
 	else
 	{
 		pass_str = malloc(1);
-		pass_str[0] = '\0'; // Set an empty string for networks without passwords
+		pass_str[0] = '\0';
 		ESP_LOGI(TAG, "http_server_wifi_connect_json_handler: No password provided, connecting to open network");
 	}
 
@@ -270,7 +270,7 @@ static esp_err_t http_server_uart_msg_json_handler(httpd_req_t *req)
 	if (DISEASE != NULL)
 	{
 		ESP_LOGI(TAG, "Enviando %d", DISEASE->valueint);
-		uart_Handle_send_message(DISEASE->valueint);
+		uart_app_send_message(DISEASE->valueint);
 	}
 	else
 	{

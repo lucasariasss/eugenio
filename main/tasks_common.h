@@ -25,15 +25,25 @@
 
 //tasks de el controlador de uart
 #define BOOTLOADER_UART                     0
-#define UART_HANDLE_TASK_STACK_SIZE			1024
-#define UART_HANDLE_TASK_PRIORITY           5
-#define UART_HANDLE_TASK_CORE_ID			0
+#define UART_APP_TASK_STACK_SIZE			1024
+#define UART_APP_TASK_PRIORITY           5
+#define UART_APP_TASK_CORE_ID			0
 
-//release macros (para la release todos tienen que estar en 1)
-#define RELEASE                             0
-#if defined (RELEASE) && (RELEASE == 1)
-#define HIDE_LOGS // activa el log de la aplicacion
-#define UARTS     // si esta en uno es que se habilita el uso de la uart num 
-#endif //RELEASE         
+//tasks de la aplicacion de uart
+#if defined(BOOTLOADER_UART) && (BOOTLOADER_UART == 1)
+#define TXD_PIN (GPIO_NUM_1)
+#define RXD_PIN (GPIO_NUM_3)
+#define UART_NUM (UART_NUM_0)
+#else
+#define TXD_PIN (GPIO_NUM_17)
+#define RXD_PIN (GPIO_NUM_16)
+#define UART_NUM (UART_NUM_1)
+#endif
+
+//tasks de la aplicacion de lcd
+#define SCL_PIN (GPIO_NUM_22)
+#define SDA_PIN (GPIO_NUM_21)
+#define I2C_NUM (I2C_NUM_1)
+#define LCD_ADDRESS 0x3C
 
 #endif /* MAIN_TASKS_COMMON_H_ */

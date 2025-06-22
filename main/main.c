@@ -7,6 +7,7 @@
 #include "driver/gpio.h"
 
 #include "uart_app.h"
+/*#include "lcd_app.h"*/
 #include "wifi_app.h"
 
 static const char TAG[] = "main";
@@ -37,7 +38,7 @@ void app_main(void)
     ESP_LOGI(TAG, "Inicializando UART...");
     
     // Llama a la función de inicialización de UART
-    esp_err_t uart_ret = uart_Handle_init();
+    esp_err_t uart_ret = uart_app_init();
     if (uart_ret != ESP_OK)
     {
         ESP_LOGE(TAG, "Error al inicializar UART: %s", esp_err_to_name(uart_ret));
@@ -47,6 +48,20 @@ void app_main(void)
         ESP_LOGI(TAG, "UART inicializada correctamente.");
     }
  	ESP_ERROR_CHECK(ret);
+
+	// Inicia la aplicación LCD
+	/*
+	esp_err_t lcd_ret = lcd_app_init();
+	if (lcd_ret != ESP_OK)
+	{
+		ESP_LOGE(TAG, "Error al inicializar LCD: %s", esp_err_to_name(lcd_ret));
+	}
+	else
+	{
+		ESP_LOGI(TAG, "Aplicación LCD iniciada correctamente.");
+		lcd_app_send_message();
+	}
+	*/
 }
 
 
