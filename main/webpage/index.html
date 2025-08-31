@@ -17,7 +17,6 @@
 		</div>
 		<div class="banner">
 		    <h1>Simulador Eugenio</h1>
-			<h1 onclick="switchConfig()"><span>&#9881;</span></h1>
 		</div>
 	</header>
 
@@ -133,37 +132,6 @@
 				</select>
 				<div class="buttons">
 					<input id="execute_simulation" type="button" value="Empezar"/>
-				</div>
-			</div>
-			
-			<div id="settings" style="display: none;">
-				<div id="WiFiConnect">
-					<h2>Conexion de WiFi</h2>
-					<section>
-						<input id="connect_ssid" type="text" maxlength="32" placeholder="SSID" value="">
-						<section class="flexx">
-							<input id="connect_pass" type="password" maxlength="64" placeholder="Contraseña" value="">
-							<input type="checkbox" onclick="showPassword()">
-						</section>
-					</section>
-					<div class="buttons">
-						<input id="connect_wifi" type="button" value="Conectar" />
-					</div>
-					<div id="wifi_connect_credentials_errors"></div>
-					<h4 id="wifi_connect_status"></h4>
-				</div>
-
-				<div id="ConnectInfo">
-					<section>
-						<div id="connected_ap_label"></div> <div id="connected_ap"></div>
-						<div id="ap_ssid_label">AP SSID:</div> <div id="ap_ssid"></div>
-					</section>
-					<div id="ip_address_label"></div> <div id="wifi_connect_ip"></div>
-					<div id="netmask_label"></div> <div id="wifi_connect_netmask"></div>
-					<div id="gateway_label"></div> <div id="wifi_connect_gw"></div>
-					<div class="buttons">
-						<input id="disconnect_wifi" type="button" value="Desconectar" />
-					</div>
 				</div>
 			</div>
 		</div>
