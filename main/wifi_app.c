@@ -186,7 +186,11 @@ static void wifi_app_soft_ap_config(void)
 	ESP_ERROR_CHECK(esp_netif_set_ip_info(esp_netif_ap, &ap_ip_info)); 		//configura estaticamente la interfaz de red
 	ESP_ERROR_CHECK(esp_netif_dhcps_start(esp_netif_ap)); 					//comienza el servidor DHCP de la AP (para estaciones de coneccion como un telefono)
 
-	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));					// define el modo como estacion o punto de acceso
+#if HAS_STA_MODE == 1
+	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));	// define el modo como estacion o punto de acceso
+#else
+	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));		// define el modo como estacion
+#endif // HAS_STA_MODE
 	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &ap_config));		//setea la configuracion
 	ESP_ERROR_CHECK(esp_wifi_set_bandwidth(WIFI_IF_AP, WIFI_AP_BANDWIDTH));	//20MHz
 	ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_STA_POWER_SAVE));

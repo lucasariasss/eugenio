@@ -5,7 +5,7 @@
  *      Author: arias
  */
 
-#ifdef HAS_STA_MODE == 1
+#if HAS_STA_MODE == 1
 
 #include  <stdbool.h>
 #include  <stdio.h>
