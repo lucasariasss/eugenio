@@ -13,7 +13,7 @@ $(document).ready(function(){
  * 3.0.1. Manda la opcion seleccionada a la STM32
  */
 function send_uart(){
-	const selectedDisease = parseInt($('#selectedDis').val()) + 1;
+	const selectedDisease = parseInt($('#selectedDis').val());
 	const data = JSON.stringify({ disease: selectedDisease, timestamp: Date.now() });
 
 	$.ajax({

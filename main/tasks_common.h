@@ -12,7 +12,7 @@
 
 //tasks de la app de wifi
 #define WIFI_APP_TASK_STACK_SIZE			4096
-#define WIFI_APP_TASK_PRIORITY				5
+#define WIFI_APP_TASK_PRIORITY				2
 #define WIFI_APP_TASK_CORE_ID				0
 
 //informacion de las tareas del servidor http
@@ -28,8 +28,8 @@
 //tasks de el controlador de uart
 #define BOOTLOADER_UART                     0
 #define UART_APP_TASK_STACK_SIZE			1024
-#define UART_APP_TASK_PRIORITY           5
-#define UART_APP_TASK_CORE_ID			0
+#define UART_APP_TASK_PRIORITY              5
+#define UART_APP_TASK_CORE_ID			    0
 
 //tasks de la aplicacion de uart
 #if defined(BOOTLOADER_UART) && (BOOTLOADER_UART == 1)
