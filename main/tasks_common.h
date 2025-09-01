@@ -8,6 +8,8 @@
 #ifndef MAIN_TASKS_COMMON_H_
 #define MAIN_TASKS_COMMON_H_
 
+#define HAS_STA_MODE  0// 0 = sin modo estación, 1 = con modo estación
+
 //tasks de la app de wifi
 #define WIFI_APP_TASK_STACK_SIZE			4096
 #define WIFI_APP_TASK_PRIORITY				5

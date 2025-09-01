@@ -5,6 +5,8 @@
  *      Author: arias
  */
 
+#ifdef HAS_STA_MODE == 1
+
 #include  <stdbool.h>
 #include  <stdio.h>
 #include  <string.h>
@@ -222,6 +224,7 @@ void app_nvs_struct_array_to_json( cJSON *json)
     }
 }
 
+#endif // HAS_STA_MODE
 
 
 

@@ -8,6 +8,8 @@
 #ifndef MAIN_APP_NVS_H_
 #define MAIN_APP_NVS_H_
 
+#if HAS_STA_MODE == 1
+
 #include <cJSON.h>
 #include "wifi_app.h"
 
@@ -49,5 +51,7 @@ void app_nvs_print_sta_creds(void);
  * @param[out] json  Un puntero a un objeto cJSON donde se agregarán las credenciales.
  */
 void app_nvs_struct_array_to_json(cJSON *json);
+
+#endif // HAS_STA_MODE
 
 #endif /* MAIN_APP_NVS_H_ */
