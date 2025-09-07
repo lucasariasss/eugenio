@@ -14,9 +14,7 @@
 #include "esp_wifi.h"
 #include "lwip/netdb.h"
 
-#if HAS_STA_MODE == 1
 #include "app_nvs.h"
-#endif // HAS_STA_MODE
 #include "http_server.h"
 #include "tasks_common.h"
 #include "wifi_app.h"
@@ -28,7 +26,7 @@ static const char TAG [] = "wifi_app";
 static wifi_connected_event_callback_t wifi_connected_event_cb;
 
 // Usado para devolver la configuración wifi
-static wifi_config_t *wifi_config = NULL;
+wifi_config_t *wifi_config = NULL;
 
 // Usado para rastrear el número de reintentos cuando un intento de conexión falla
 static int g_retry_number;
@@ -79,7 +77,6 @@ static void wifi_app_event_handler(void *arg, esp_event_base_t event_base, int32
 			ESP_LOGI(TAG, "WIFI_EVENT_AP_STADISCONNECTED");
 			break;
 
-#if HAS_STA_MODE == 1
 		case WIFI_EVENT_STA_START:
 			ESP_LOGI(TAG, "WIFI_EVENT_STA_START");
 			break;
@@ -117,7 +114,6 @@ static void wifi_app_event_handler(void *arg, esp_event_base_t event_base, int32
 			wifi_app_send_message(WIFI_APP_MSG_STA_CONNECTED_GOT_IP);
 
 			break;
-#endif // HAS_STA_MODE
 		}
 	}
 }
@@ -201,10 +197,10 @@ static void wifi_app_soft_ap_config(void)
  */
 static void wifi_app_connect_sta(void)
 {
-#if HAS_STA_MODE != 1
-	ESP_LOGW(TAG, "Station mode not enabled. Skipping connection attempt.");
-	return;
-#endif // HAS_STA_MODE
+//#if HAS_STA_MODE != 1
+//	ESP_LOGW(TAG, "Modo estación no habilitado. Omitiendo intento de conexión.");
+//	return;
+//#endif // HAS_STA_MODE
 	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, wifi_app_get_wifi_config()));
 	ESP_ERROR_CHECK(esp_wifi_connect());
 }
@@ -240,7 +236,6 @@ static void wifi_app_task(void *pvParameters)
 			{
 				case WIFI_APP_MSG_LOAD_SAVED_CREDENTIALS:
 					ESP_LOGI(TAG, "WIFI_APP_MSG_LOAD_SAVED_CREDENTIALS");
-#if HAS_STA_MODE == 1
 					if (app_nvs_load_sta_creds())
 					{
 						ESP_LOGI(TAG, "Loaded station configuiration");
@@ -254,10 +249,6 @@ static void wifi_app_task(void *pvParameters)
 
 					// A continuación, iniciar el servidor web
 					wifi_app_send_message(WIFI_APP_MSG_START_HTTP_SERVER);
-#else
-					ESP_LOGI(TAG, "Station mode not enabled. Skipping loading saved credentials.");
-					xEventGroupSetBits(wifi_app_event_group, WIFI_APP_CONNECTING_USING_SAVED_CREDS_BIT);
-#endif // HAS_STA_MODE
 					break;
 
 				case WIFI_APP_MSG_START_HTTP_SERVER:
@@ -283,7 +274,6 @@ static void wifi_app_task(void *pvParameters)
 
 					break;
 
-#if HAS_STA_MODE == 1
 				case WIFI_APP_MSG_STA_CONNECTED_GOT_IP:
 					ESP_LOGI(TAG, "WIFI_APP_MSG_STA_CONNECTED_GOT_IP");
 
@@ -364,7 +354,6 @@ static void wifi_app_task(void *pvParameters)
 					}
 
 					break;
-#endif // HAS_STA_MODE
 
 				default:
 					break;

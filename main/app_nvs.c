@@ -5,8 +5,6 @@
  *      Author: arias
  */
 
-#if HAS_STA_MODE == 1
-
 #include  <stdbool.h>
 #include  <stdio.h>
 #include  <string.h>
@@ -34,6 +32,7 @@ const char app_nvs_sta_creds_namespace[] = "stacreds";
 
 esp_err_t app_nvs_save_sta_creds(void)
 {
+#if HAS_STA_MODE == 1
 	nvs_handle handle;
 	esp_err_t esp_err;
 	ESP_LOGI(TAG, "app_nvs_save_sta_creds: Salvando credenciales de modo estación en NVS");
@@ -100,10 +99,15 @@ esp_err_t app_nvs_save_sta_creds(void)
 
 	printf("app_nvs_save_stacreds: returned ESP_OK\n");
 	return ESP_OK;
+#else
+	ESP_LOGW(TAG, "app_nvs_save_sta_creds: Modo estación no habilitado, omitiendo el guardado de credenciales.");
+	return ESP_ERR_NOT_SUPPORTED;
+#endif // HAS_STA_MODE
 }
 
 bool app_nvs_load_sta_creds(void)
 {
+#if HAS_STA_MODE == 1
 	nvs_handle handle;
 	esp_err_t esp_err;
 
@@ -136,10 +140,19 @@ bool app_nvs_load_sta_creds(void)
 	// Buscar primer credencial válida
 	app_nvs_print_sta_creds();
 	return false;
+#else
+	ESP_LOGW(TAG, "app_nvs_save_sta_creds: Modo estación no habilitado, omitiendo el guardado de credenciales.");
+	return false;
+#endif // HAS_STA_MODE
 }
 
 esp_err_t app_nvs_clear_sta_creds(void)
 {
+#if HAS_STA_MODE != 1
+	ESP_LOGW(TAG, "app_nvs_clear_sta_creds: Modo estación no habilitado, omitiendo el borrado de credenciales.");
+	return ESP_ERR_NOT_SUPPORTED;
+#endif // HAS_STA_MODE
+
 	nvs_handle handle;
 	esp_err_t esp_err;
 	ESP_LOGI(TAG, "app_nvs_clear_sta_creds: Clearing Wifi station mode credentials from flash");
@@ -174,6 +187,11 @@ esp_err_t app_nvs_clear_sta_creds(void)
 
 void app_nvs_print_sta_creds(void)
 {
+#if HAS_STA_MODE != 1
+	ESP_LOGW(TAG, "app_nvs_print_sta_creds: Modo estación no habilitado, omitiendo la impresión de credenciales.");
+	return;	
+#endif // HAS_STA_MODE
+
 	nvs_handle handle;
 	esp_err_t esp_err;
 
@@ -204,6 +222,7 @@ void app_nvs_print_sta_creds(void)
 
 void app_nvs_struct_array_to_json( cJSON *json)
 {
+#if HAS_STA_MODE == 1
     for (int i = 0; i < MAX_SAVED_CREDS; i++) {
         if (saved_creds[i].ssid[0] != '\0') {     // Verifica si la credencial es válida
             cJSON *cred_json = cJSON_CreateObject();
@@ -222,9 +241,10 @@ void app_nvs_struct_array_to_json( cJSON *json)
             ESP_LOGE(TAG, "No hay credencial válida en espacio %d", i);
         }
     }
-}
-
+#else 
+	ESP_LOGW(TAG, "app_nvs_struct_array_to_json: Modo estación no habilitado, omitiendo la conversión a JSON de credenciales.");
 #endif // HAS_STA_MODE
+}
 
 
 

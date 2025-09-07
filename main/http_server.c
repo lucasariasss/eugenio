@@ -271,6 +271,7 @@ static esp_err_t http_server_uart_msg_json_handler(httpd_req_t *req)
 	{
 		ESP_LOGI(TAG, "Enviando %d", DISEASE->valueint);
 		uart_app_send_message(DISEASE->valueint);
+		//uart_app_acknowledge_message();
 	}
 	else
 	{
@@ -403,11 +404,16 @@ static httpd_handle_t http_server_configure(void)
 	// generar configuracion predeterminada
 	httpd_config_t config = HTTPD_DEFAULT_CONFIG();
 
+	// Crear la cola de mensajes antes de iniciar la tarea del monitor
+	http_server_monitor_queue_handle = xQueueCreate(3, sizeof(http_server_queue_message_t));
+	if (http_server_monitor_queue_handle == NULL)
+	{
+		ESP_LOGE(TAG, "http_server_configure: failed to create monitor queue");
+		return NULL;
+	}
+
 	// Crear el monitor del servidor http
 	xTaskCreatePinnedToCore(&http_server_monitor, "http_server_monitor", HTTP_SERVER_MONITOR_STACK_SIZE, NULL, HTTP_SERVER_MONITOR_PRIORITY, &task_http_server_monitor, HTTP_SERVER_MONITOR_CORE_ID);
-
-	// Crear la cola de mensajes
-	http_server_monitor_queue_handle = xQueueCreate(3, sizeof(http_server_queue_message_t));
 
 	config.core_id = HTTP_SERVER_TASK_CORE_ID;
 	config.task_priority = HTTP_SERVER_TASK_PRIORITY;

@@ -38,24 +38,16 @@ void uart_app_send_message(int disease)
         ESP_LOGI(TAG, "uart_app_send_message: Memoria asignada");
     }
 
-
-    if (disease != 0)
-    {
-        bzero(data, sizeof(int));
-        char chardisease = disease;
-        ESP_LOGI(TAG, "uart_app_send_message: Enviando mensaje por UART: %x", disease);
-        snprintf((char *)data, sizeof(int), "%c", chardisease);
-        int bytes_written = uart_write_bytes(UART_NUM, (const char *)data, strlen((char *)data));
-        if (bytes_written < 0) {
-            ESP_LOGE(TAG, "uart_app_send_message: Error enviando mensaje");
-        } else {
-            ESP_LOGI(TAG, "uart_app_send_message: Enviando %d bytes", bytes_written);
-            ESP_ERROR_CHECK(uart_wait_tx_done(UART_NUM, 100));
-        }
-    }
-    else
-    {
-        ESP_LOGE(TAG, "uart_app_send_message: DISEASE o DISEASE->valuestring es NULL");
+    bzero(data, sizeof(int));
+    char chardisease = disease;
+    ESP_LOGI(TAG, "uart_app_send_message: Enviando mensaje por UART: %x", disease);
+    snprintf((char *)data, sizeof(int), "%c", chardisease);
+    int bytes_written = uart_write_bytes(UART_NUM, (const char *)data, strlen((char *)data));
+    if (bytes_written < 0) {
+        ESP_LOGE(TAG, "uart_app_send_message: Error enviando mensaje");
+    } else {
+        ESP_LOGI(TAG, "uart_app_send_message: Enviando %d bytes", bytes_written);
+        ESP_ERROR_CHECK(uart_wait_tx_done(UART_NUM, 100));
     }
     free(data);
 
