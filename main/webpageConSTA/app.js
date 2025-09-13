@@ -44,7 +44,7 @@ function switchConfig()
  */
 function send_uart(){
 	const selectedDisease = parseInt($('#selectedDis').val()) + 1;
-	const data = JSON.stringify({ disease: selectedDisease, timestamp: Date.now() });
+	const data = JSON.stringify({ enfermedad: selectedDisease, timestamp: Date.now() });
 
 	$.ajax({
 		url: '/UARTmsg.json',

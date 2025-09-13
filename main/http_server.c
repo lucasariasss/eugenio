@@ -34,7 +34,7 @@ static TaskHandle_t task_http_server_monitor = NULL;
 static QueueHandle_t http_server_monitor_queue_handle;
 
 // Definicion de la enfermerdad que se enviara por UART
-cJSON *DISEASE;
+cJSON *ENFERMEDAD;
 
 // archivos embebidos: jquery, index.html, app.css, app.js, favicon.ico model.png y logo.png
 extern const uint8_t jquery_3_3_1_min_js_start[] asm("_binary_jquery_3_3_1_min_js_start");
@@ -111,7 +111,7 @@ static void http_server_monitor(void *parameter)
 /*CONTROLADORES GET*/
 static esp_err_t http_server_static_handler(httpd_req_t *req, const char *type, const char *start, const char *end)
 {
-	ESP_LOGI(TAG, "%s requested", req->uri);
+	ESP_LOGI(TAG, "%s solicitado", req->uri);
 
 	httpd_resp_set_type(req, type);
 	httpd_resp_send(req, start, end - start);
@@ -134,14 +134,14 @@ DEFINE_STATIC_HANDLER(http_server_model_png_handler, "image/x-icon", model_png_s
 DEFINE_STATIC_HANDLER(http_server_logo_png_handler, "image/x-icon", logo_png_start, logo_png_end)
 
 /*
- * wifiConnect.json handle is invoked after the connect button is pressed
- * and handles receiving the SSID and password entered by the user
- * @param req HTTP request for wich the uri needs to be handled
+ * El manejador wifiConnect.json se invoca después de presionar el botón de conectar
+ * y maneja la recepción del SSID y la contraseña ingresados por el usuario
+ * @param req Solicitud HTTP para la cual se debe manejar la URI
  * @return ESP_OK
  */
 static esp_err_t http_server_wifi_connect_json_handler(httpd_req_t *req)
 {
-	ESP_LOGI(TAG, "/wifiConnect.json requested");
+	ESP_LOGI(TAG, "/wifiConnect.json solicitado");
 
 	size_t len_ssid = 0, len_pass = 0;
 	char *ssid_str = NULL, *pass_str = NULL;
@@ -153,7 +153,7 @@ static esp_err_t http_server_wifi_connect_json_handler(httpd_req_t *req)
 		ssid_str = malloc(len_ssid);
 		if (httpd_req_get_hdr_value_str(req, "my-connect-ssid", ssid_str, len_ssid) == ESP_OK)
 		{
-			ESP_LOGI(TAG, "http_server_wifi_connect_json_handler: Found header => my-connect-ssid: %s", ssid_str);
+			ESP_LOGI(TAG, "http_server_wifi_connect_json_handler: Se encontró el encabezado => my-connect-ssid: %s", ssid_str);
 		}
 	}
 
@@ -164,17 +164,17 @@ static esp_err_t http_server_wifi_connect_json_handler(httpd_req_t *req)
 		pass_str = malloc(len_pass);
 		if (httpd_req_get_hdr_value_str(req, "my-connect-pwd", pass_str, len_pass) == ESP_OK)
 		{
-			ESP_LOGI(TAG, "http_server_wifi_connect_json_handler: Found header => my-connect-pwd: %s", pass_str);
+			ESP_LOGI(TAG, "http_server_wifi_connect_json_handler: Se encontró el encabezado => my-connect-pwd: %s", pass_str);
 		}
 	}
 	else
 	{
 		pass_str = malloc(1);
 		pass_str[0] = '\0';
-		ESP_LOGI(TAG, "http_server_wifi_connect_json_handler: No password provided, connecting to open network");
+		ESP_LOGI(TAG, "http_server_wifi_connect_json_handler: No se proporcionó contraseña, conectando a red abierta");
 	}
 
-	// Update the wifi networks configuration and let the wifi apllication know
+	// Actualiza la configuración de redes wifi y notifica a la aplicación wifi
 	wifi_config_t *wifi_config = wifi_app_get_wifi_config();
 	memset(wifi_config, 0x00, sizeof(wifi_config_t));
 	memcpy(wifi_config->sta.ssid, ssid_str, len_ssid);
@@ -199,13 +199,13 @@ static esp_err_t http_server_wifi_connect_json_handler(httpd_req_t *req)
 }
 
 /*
- * wifiConnectStatus handler updates the connection status for the web page.
- * @param req HTTP request for wich the uri needs to be handled
+ * El manejador wifiConnectStatus actualiza el estado de la conexión para la página web.
+ * @param req Solicitud HTTP para la cual se debe manejar la URI
  * @return ESP_OK
  */
 static esp_err_t http_server_wifi_connect_status_json_handler(httpd_req_t *req)
 {
-	ESP_LOGI(TAG, "/wifiConnectStatus requested");
+	ESP_LOGI(TAG, "/wifiConnectStatus solicitado");
 
 	char statusJSON[100];
 
@@ -219,74 +219,74 @@ static esp_err_t http_server_wifi_connect_status_json_handler(httpd_req_t *req)
 
 static esp_err_t http_server_uart_msg_json_handler(httpd_req_t *req)
 {
-	ESP_LOGI(TAG, "/UARTmsg.json requested");
+	ESP_LOGI(TAG, "/UARTmsg.json solicitado");
 
 	char content[100];
 	int ret, remaining = req->content_len;
 
 	if (remaining >= sizeof(content))
 	{
-		ESP_LOGE(TAG, "Content too long");
-		httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Content too long");
+		ESP_LOGE(TAG, "El contenido es demasiado largo");
+		httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "El contenido es demasiado largo");
 		return ESP_FAIL;
 	}
 
 	ret = httpd_req_recv(req, content, remaining);
 	if (ret <= 0)
 	{
-		ESP_LOGE(TAG, "Failed to receive content");
-		httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to receive content");
+		ESP_LOGE(TAG, "No se pudo recibir el contenido");
+		httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "No se pudo recibir el contenido");
 		return ESP_FAIL;
 	}
 
-	// Parse the JSON
+	// Analizar el JSON
 	cJSON *json = cJSON_Parse(content);
 	if (json == NULL)
 	{
 		const char *error_ptr = cJSON_GetErrorPtr();
 		if (error_ptr != NULL)
 		{
-			ESP_LOGE(TAG, "Error before: %s", error_ptr);
+			ESP_LOGE(TAG, "Error antes de: %s", error_ptr);
 		}
 		else
 		{
-			ESP_LOGE(TAG, "Unknown error parsing JSON.");
+			ESP_LOGE(TAG, "Error desconocido al analizar el JSON.");
 		}
 		return ESP_FAIL;
 	}
 
-	// Print the JSON to the console
+	// Imprimir el JSON en la consola
 	char *json_string = cJSON_Print(json);
 	if (json_string == NULL)
 	{
-		ESP_LOGE(TAG, "Failed to print JSON");
+		ESP_LOGE(TAG, "No se pudo imprimir el JSON");
 		cJSON_Delete(json);
-		httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to print JSON");
+		httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "No se pudo imprimir el JSON");
 		return ESP_FAIL;
 	}
-	ESP_LOGI(TAG, "Received JSON: %s", json_string);
+	ESP_LOGI(TAG, "JSON recibido: %s", json_string);
 
-	DISEASE = cJSON_GetObjectItem(json, "disease");
-	if (DISEASE != NULL)
+	ENFERMEDAD = cJSON_GetObjectItem(json, "enfermedad");
+	if (ENFERMEDAD != NULL)
 	{
-		ESP_LOGI(TAG, "Enviando %d", DISEASE->valueint);
-		uart_app_send_message(DISEASE->valueint);
+		ESP_LOGI(TAG, "Enviando %d", ENFERMEDAD->valueint);
+		uart_app_send_message(ENFERMEDAD->valueint);
 		//uart_app_acknowledge_message();
 	}
 	else
 	{
-		ESP_LOGE(TAG, "DISEASE esta definida como NULL");
-		httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "DISEASE is NULL");
+		ESP_LOGE(TAG, "ENFERMEDAD esta definida como NULL");
+		httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "ENFERMEDAD is NULL");
 		cJSON_Delete(json);
 		cJSON_free(json_string);
 		return ESP_FAIL;
 	}
 
-	// Clean up
+	// Limpiar recursos
 	cJSON_free(json_string);
 	cJSON_Delete(json);
 
-	// Send a response
+	// Enviar una respuesta
 	httpd_resp_set_type(req, "application/json");
 	httpd_resp_send(req, "{\"status\":\"success\"}", HTTPD_RESP_USE_STRLEN);
 
@@ -294,13 +294,13 @@ static esp_err_t http_server_uart_msg_json_handler(httpd_req_t *req)
 }
 
 /*
- * wifiConnectInfo.json handler updates the webpage with the connection info.
- * @param req HTTP request for wich the uri needs to be handled
+ * El manejador wifiConnectInfo.json actualiza la página web con la información de conexión.
+ * @param req Solicitud HTTP para la cual se debe manejar la URI
  * @return ESP_OK
  */
 static esp_err_t http_server_get_wifi_connect_info_json_handler(httpd_req_t *req)
 {
-	ESP_LOGI(TAG, "/wifiConnectInfo.json requested");
+	ESP_LOGI(TAG, "/wifiConnectInfo.json solicitado");
 
 	char ipInfoJSON[200];
 	memset(ipInfoJSON, 0, sizeof(ipInfoJSON));
@@ -331,13 +331,13 @@ static esp_err_t http_server_get_wifi_connect_info_json_handler(httpd_req_t *req
 }
 
 /*
- * wifiDisconnect.json handler responds by sending a message to the wifi application to disconnect.
- * @param req HTTP request for wich the uri needs to be handled
+ * El manejador wifiDisconnect.json responde enviando un mensaje a la aplicación wifi para desconectarse.
+ * @param req Solicitud HTTP para la cual se debe manejar la URI
  * @return ESP_OK
  */
 static esp_err_t http_server_wifi_disconnect_json_handler(httpd_req_t *req)
 {
-	ESP_LOGI(TAG, "wifiDisconnect.json requested");
+	ESP_LOGI(TAG, "wifiDisconnect.json solicitado");
 
 	wifi_app_send_message(WIFI_APP_MSG_USER_REQUESTED_STA_DISCONNECT);
 
@@ -358,7 +358,7 @@ static esp_err_t http_server_wifi_disconnect_json_handler(httpd_req_t *req)
  */
 static esp_err_t http_server_get_ap_ssid_json_handler(httpd_req_t *req)
 {
-	ESP_LOGI(TAG, "/apSSID.json requested");
+	ESP_LOGI(TAG, "/apSSID.json solicitado");
 
 	char ssidJSON[50];
 
@@ -408,7 +408,7 @@ static httpd_handle_t http_server_configure(void)
 	http_server_monitor_queue_handle = xQueueCreate(3, sizeof(http_server_queue_message_t));
 	if (http_server_monitor_queue_handle == NULL)
 	{
-		ESP_LOGE(TAG, "http_server_configure: failed to create monitor queue");
+		ESP_LOGE(TAG, "http_server_configure: no se pudo crear la cola del monitor");
 		return NULL;
 	}
 
@@ -422,13 +422,13 @@ static httpd_handle_t http_server_configure(void)
 	config.recv_wait_timeout = 10;
 	config.send_wait_timeout = 10;
 
-	ESP_LOGI(TAG, "http_server_configure: starting server on port: '%d' with task priority: '%d'",
+	ESP_LOGI(TAG, "http_server_configure: iniciando servidor en el puerto: '%d' con prioridad de tarea: '%d'",
 			 config.server_port, config.task_priority);
 
 	// comenzar el servidor httpd
 	if (httpd_start(&http_server_handle, &config) == ESP_OK)
 	{
-		ESP_LOGI(TAG, "http_server_configure: Registering URI handlers");
+		ESP_LOGI(TAG, "http_server_configure: Registrando manejadores de URI");
 
 		http_server_register_uri_handler("/jquery-3.3.1.min.js", HTTP_GET, http_server_jquery_handler);
 		http_server_register_uri_handler("/", HTTP_GET, http_server_index_html_handler);
@@ -463,13 +463,13 @@ void http_server_stop(void)
 	if (http_server_handle)
 	{
 		httpd_stop(http_server_handle);
-		ESP_LOGI(TAG, "http_server_stop: stopping http server");
+		ESP_LOGI(TAG, "http_server_stop: deteniendo el servidor http");
 		http_server_handle = NULL;
 	}
 	if (task_http_server_monitor)
 	{
 		vTaskDelete(task_http_server_monitor);
-		ESP_LOGI(TAG, "http_server_stop: stopping HTTP server monitor");
+		ESP_LOGI(TAG, "http_server_stop: deteniendo el monitor del servidor HTTP");
 		task_http_server_monitor = NULL;
 	}
 }

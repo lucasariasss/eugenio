@@ -26,7 +26,7 @@
 
 static const char TAG[] = "uart_app";
 
-void uart_app_send_message(int disease)
+void uart_app_send_message(int enfermedad)
 { 
     uint8_t *data = (uint8_t *)malloc(sizeof(int));
     if (data == NULL)
@@ -39,8 +39,8 @@ void uart_app_send_message(int disease)
     }
 
     bzero(data, sizeof(int));
-    char chardisease = disease;
-    ESP_LOGI(TAG, "uart_app_send_message: Enviando mensaje por UART: %x", disease);
+    char chardisease = enfermedad;
+    ESP_LOGI(TAG, "uart_app_send_message: Enviando mensaje por UART: %x", enfermedad);
     snprintf((char *)data, sizeof(int), "%c", chardisease);
     int bytes_written = uart_write_bytes(UART_NUM, (const char *)data, strlen((char *)data));
     if (bytes_written < 0) {

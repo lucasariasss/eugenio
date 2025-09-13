@@ -13,7 +13,7 @@
 
 esp_err_t uart_app_init(void);
 
-void uart_app_send_message(int disease);
+void uart_app_send_message(int enfermedad);
 
 
 #endif /* MAIN_UARTHANDLE_H_ */
