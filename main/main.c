@@ -1,3 +1,8 @@
+/**
+ * @file main.c
+ * @brief Archivo principal del proyecto basado en ESP-IDF.
+ *
+ */
 #include "freertos/FreeRTOS.h"
 #include "esp_wifi.h"
 #include "esp_system.h"
@@ -5,6 +10,7 @@
 #include "nvs_flash.h"
 #include "esp_log.h"
 #include "driver/gpio.h"
+#include "tasks_common.h"
 
 #include "uart_app.h"
 /*#include "lcd_app.h"*/
@@ -38,30 +44,16 @@ void app_main(void)
     ESP_LOGI(TAG, "Inicializando UART...");
     
     // Llama a la función de inicialización de UART
-    esp_err_t uart_ret = uart_app_init();
-    if (uart_ret != ESP_OK)
+    ret = uart_app_init();
+    if (ret != ESP_OK)
     {
-        ESP_LOGE(TAG, "Error al inicializar UART: %s", esp_err_to_name(uart_ret));
+        ESP_LOGE(TAG, "Error al inicializar UART: %s", esp_err_to_name(ret));
     }
     else
     {
         ESP_LOGI(TAG, "UART inicializada correctamente.");
     }
  	ESP_ERROR_CHECK(ret);
-
-	// Inicia la aplicación LCD
-	/*
-	esp_err_t lcd_ret = lcd_app_init();
-	if (lcd_ret != ESP_OK)
-	{
-		ESP_LOGE(TAG, "Error al inicializar LCD: %s", esp_err_to_name(lcd_ret));
-	}
-	else
-	{
-		ESP_LOGI(TAG, "Aplicación LCD iniciada correctamente.");
-		lcd_app_send_message();
-	}
-	*/
 }
 
 

@@ -1,8 +1,9 @@
-/*
- * uart_app.c
- *
- *  Created on: 8 sep. 2024
- *      Author: arias
+/**
+ * @file uart_app.c
+ * @author Lucas Arias (1605137@ucc.edu.ar)
+ * @brief Implementación de funciones para comunicación UART en la aplicación principal.
+ * @date 2024-09-8
+ * 
  */
 
 #include  <stdbool.h>
@@ -26,7 +27,7 @@
 
 static const char TAG[] = "uart_app";
 
-void uart_app_send_message(int enfermedad)
+void uart_app_send_message(uint8_t enfermedad)
 { 
     uint8_t *data = (uint8_t *)malloc(sizeof(int));
     if (data == NULL)
@@ -38,7 +39,7 @@ void uart_app_send_message(int enfermedad)
         ESP_LOGI(TAG, "uart_app_send_message: Memoria asignada");
     }
 
-    bzero(data, sizeof(int));
+    bzero(data, sizeof(uint8_t));
     char chardisease = enfermedad;
     ESP_LOGI(TAG, "uart_app_send_message: Enviando mensaje por UART: %x", enfermedad);
     snprintf((char *)data, sizeof(int), "%c", chardisease);

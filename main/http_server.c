@@ -1,8 +1,12 @@
-/*
- * http_server.c
+/**
+ * @file http_server.c
+ * @brief Implementación del servidor HTTP para el proyecto.
  *
- *  Created on: Oct 5, 2023
- *      Author: arias
+ * Este archivo contiene las funciones y definiciones necesarias para la
+ * implementación del servidor HTTP utilizado en el proyecto de tesis.
+ *
+ * @date 5 de octubre de 2023
+ * @author arias
  */
 
 #include "esp_http_server.h"
@@ -33,7 +37,7 @@ static TaskHandle_t task_http_server_monitor = NULL;
 // controlador de la cola usado para manipular la cola principal de eventos
 static QueueHandle_t http_server_monitor_queue_handle;
 
-// Definicion de la enfermerdad que se enviara por UART
+// Definicion de la enfermedad que se enviara por UART
 cJSON *ENFERMEDAD;
 
 // archivos embebidos: jquery, index.html, app.css, app.js, favicon.ico model.png y logo.png
@@ -68,11 +72,8 @@ static void http_server_update_wifi_connect_status(char *message, http_server_wi
 }
 
 /**
- * Esta función está destinada a monitorear el estado y el rendimiento del servidor HTTP
- * para asegurar que el servidor esté operando correctamente.
- *
- * @param parameter Un puntero a los parámetros para la tarea de monitoreo. Esto puede ser
- * utilizado para pasar información de configuración o estado a la tarea.
+ * @brief Tarea que monitorea y procesa mensajes de eventos del servidor HTTP.
+ * @param parameter Puntero a parámetros de la tarea (void).
  */
 static void http_server_monitor(void *parameter)
 {
@@ -109,6 +110,19 @@ static void http_server_monitor(void *parameter)
 }
 
 /*CONTROLADORES GET*/
+/**
+ * @brief Atiende solicitudes HTTP para enviar archivos estáticos.
+ *
+ * Esta función se utiliza para responder al cliente con contenido estático 
+ * (por ejemplo, HTML, CSS, JavaScript o imágenes). Configura el tipo MIME 
+ * de la respuesta y envía el bloque de datos indicado.
+ *
+ * @param req Puntero a la estructura de la solicitud HTTP recibida.
+ * @param type Cadena con el tipo MIME del contenido (ej. "text/html").
+ * @param start Puntero al inicio del contenido en memoria.
+ * @param end Puntero al final del contenido en memoria.
+ * @return ESP_OK si el contenido fue enviado correctamente.
+ */
 static esp_err_t http_server_static_handler(httpd_req_t *req, const char *type, const char *start, const char *end)
 {
 	ESP_LOGI(TAG, "%s solicitado", req->uri);
@@ -119,6 +133,17 @@ static esp_err_t http_server_static_handler(httpd_req_t *req, const char *type, 
 	return ESP_OK;
 }
 
+/**
+ * @brief Macro para definir un manejador de contenido estático.
+ *
+ * Genera una función que atiende solicitudes HTTP y responde con el 
+ * contenido estático especificado, utilizando http_server_static_handler().
+ *
+ * @param name Nombre de la función a generar.
+ * @param type Tipo MIME del contenido (ej. "text/html").
+ * @param start Puntero al inicio del contenido en memoria.
+ * @param end Puntero al final del contenido en memoria.
+ */
 #define DEFINE_STATIC_HANDLER(name, type, start, end)                                         \
 	static esp_err_t name(httpd_req_t *req)                                                   \
 	{                                                                                         \
@@ -133,14 +158,22 @@ DEFINE_STATIC_HANDLER(http_server_favicon_ico_handler, "image/x-icon", favicon_i
 DEFINE_STATIC_HANDLER(http_server_model_png_handler, "image/x-icon", model_png_start, model_png_end)
 DEFINE_STATIC_HANDLER(http_server_logo_png_handler, "image/x-icon", logo_png_start, logo_png_end)
 
-/*
- * El manejador wifiConnect.json se invoca después de presionar el botón de conectar
- * y maneja la recepción del SSID y la contraseña ingresados por el usuario
- * @param req Solicitud HTTP para la cual se debe manejar la URI
- * @return ESP_OK
+/*CONTROLADORES POST*/
+/**
+ * @brief Maneja la solicitud JSON para conexión Wi-Fi.
+ *
+ * Este manejador procesa una petición HTTP en la ruta "/wifiConnect.json",
+ * obteniendo los encabezados personalizados `my-connect-ssid` y 
+ * `my-connect-pwd` para configurar la conexión Wi-Fi. Luego actualiza
+ * la estructura de configuración Wi-Fi y notifica a la aplicación
+ * que inicie la conexión.
+ *
+ * @param req Puntero a la solicitud HTTP recibida.
+ * @return ESP_OK si el procesamiento fue exitoso.
  */
 static esp_err_t http_server_wifi_connect_json_handler(httpd_req_t *req)
 {
+#if HAS_STA_MODE == 1
 	ESP_LOGI(TAG, "/wifiConnect.json solicitado");
 
 	size_t len_ssid = 0, len_pass = 0;
@@ -194,14 +227,15 @@ static esp_err_t http_server_wifi_connect_json_handler(httpd_req_t *req)
 
 	free(ssid_str);
 	free(pass_str);
+#endif // HAS_STA_MODE
 
 	return ESP_OK;
 }
 
-/*
- * El manejador wifiConnectStatus actualiza el estado de la conexión para la página web.
- * @param req Solicitud HTTP para la cual se debe manejar la URI
- * @return ESP_OK
+/**
+ * @brief Responde con el estado de conexión Wi-Fi en formato JSON.
+ * @param req Solicitud HTTP recibida.
+ * @return ESP_OK si la respuesta fue enviada correctamente.
  */
 static esp_err_t http_server_wifi_connect_status_json_handler(httpd_req_t *req)
 {
@@ -217,6 +251,11 @@ static esp_err_t http_server_wifi_connect_status_json_handler(httpd_req_t *req)
 	return ESP_OK;
 }
 
+/**
+ * @brief Procesa "/UARTmsg.json": recibe JSON, lo analiza y envía el valor de "enfermedad" por UART.
+ * @param req Solicitud HTTP recibida.
+ * @return ESP_OK si se respondió correctamente; ESP_FAIL en caso de error.
+ */
 static esp_err_t http_server_uart_msg_json_handler(httpd_req_t *req)
 {
 	ESP_LOGI(TAG, "/UARTmsg.json solicitado");
@@ -287,16 +326,15 @@ static esp_err_t http_server_uart_msg_json_handler(httpd_req_t *req)
 	cJSON_Delete(json);
 
 	// Enviar una respuesta
-	httpd_resp_set_type(req, "application/json");
-	httpd_resp_send(req, "{\"status\":\"success\"}", HTTPD_RESP_USE_STRLEN);
+	http_server_static_handler(req, "application/json", "{\"status\":\"success\"}", "{\"status\":\"success\"}" + HTTPD_RESP_USE_STRLEN);
 
 	return ESP_OK;
 }
 
-/*
- * El manejador wifiConnectInfo.json actualiza la página web con la información de conexión.
- * @param req Solicitud HTTP para la cual se debe manejar la URI
- * @return ESP_OK
+/**
+ * @brief Devuelve en JSON la IP, máscara, gateway y SSID si hay conexión Wi-Fi.
+ * @param req Solicitud HTTP recibida.
+ * @return ESP_OK si la respuesta fue enviada correctamente.
  */
 static esp_err_t http_server_get_wifi_connect_info_json_handler(httpd_req_t *req)
 {
@@ -330,10 +368,10 @@ static esp_err_t http_server_get_wifi_connect_info_json_handler(httpd_req_t *req
 	return ESP_OK;
 }
 
-/*
- * El manejador wifiDisconnect.json responde enviando un mensaje a la aplicación wifi para desconectarse.
- * @param req Solicitud HTTP para la cual se debe manejar la URI
- * @return ESP_OK
+/**
+ * @brief Maneja la solicitud "/wifiDisconnect.json" para desconectar el Wi-Fi.
+ * @param req Solicitud HTTP recibida.
+ * @return ESP_OK si la solicitud fue procesada correctamente.
  */
 static esp_err_t http_server_wifi_disconnect_json_handler(httpd_req_t *req)
 {
@@ -345,10 +383,7 @@ static esp_err_t http_server_wifi_disconnect_json_handler(httpd_req_t *req)
 }
 
 /**
- * @brief Manejador HTTP GET para recuperar el SSID del Punto de Acceso en formato JSON.
- *
- * Esta función maneja las solicitudes HTTP GET para obtener el SSID del Punto de Acceso
- * en formato JSON. Está destinada a ser utilizada como un manejador para el servidor HTTP.
+ * @brief Devuelve el SSID del AP en formato JSON.
  *
  * @param req Puntero a la estructura de solicitud HTTP.
  *
@@ -377,10 +412,8 @@ static esp_err_t http_server_get_ap_ssid_json_handler(httpd_req_t *req)
 /************** CONFIGURAR SERVIDOR **************/
 
 /**
- * @brief Registra un manejador para una URI específica.
- *
- * Esta función registra un manejador para una URI específica y un método HTTP con la instancia del servidor HTTP proporcionada.
- *
+ * @brief Registra un manejador de URI en el servidor HTTP.
+ * 
  * @param uri La URI para la cual se va a registrar el manejador.
  * @param method El método HTTP (por ejemplo, GET, POST) para el cual se va a registrar el manejador.
  * @param handler El puntero a la función del manejador que será llamada cuando se solicite la URI y el método especificados.
@@ -396,8 +429,8 @@ static void http_server_register_uri_handler(const char *uri, httpd_method_t met
 }
 
 /**
- * setea la configuracion predeterminada del servidor html
- * @return si la configuracion fue exitosa, devuelve la instancia del servidor http, sino NULL
+ * @brief Configura e inicia el servidor HTTP y registra los manejadores de URI.
+ * @return Manejador del servidor si se inició correctamente; NULL en caso de error.
  */
 static httpd_handle_t http_server_configure(void)
 {

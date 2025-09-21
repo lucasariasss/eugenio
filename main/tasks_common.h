@@ -1,8 +1,13 @@
-/*
- * tasks_common.h
+/**
+ * @file tasks_common.h
+ * @author Lucas Arias (1605137@ucc.edu.ar)
+ * @brief Declaraciones y definiciones comunes para la gestión de tareas en el proyecto.
  *
- *  Created on: Sep 26, 2023
- *      Author: arias
+ * Este archivo contiene las declaraciones, macros y definiciones que son utilizadas
+ * de manera común por las diferentes tareas del proyecto. Facilita la reutilización
+ * de código y la organización de las tareas en el sistema.
+ *
+ * @date 2023-09-26
  */
 
 #ifndef MAIN_TASKS_COMMON_H_
@@ -25,13 +30,11 @@
 #define HTTP_SERVER_MONITOR_PRIORITY		3
 #define HTTP_SERVER_MONITOR_CORE_ID			0
 
-//tasks de el controlador de uart
+//Controlador de uart
 #define BOOTLOADER_UART                     0
 #define UART_APP_TASK_STACK_SIZE			1024
-#define UART_APP_TASK_PRIORITY              5
-#define UART_APP_TASK_CORE_ID			    0
 
-//tasks de la aplicacion de uart
+//Definicion de la aplicacion de uart
 #if defined(BOOTLOADER_UART) && (BOOTLOADER_UART == 1)
 #define TXD_PIN (GPIO_NUM_1)
 #define RXD_PIN (GPIO_NUM_3)
@@ -41,11 +44,5 @@
 #define RXD_PIN (GPIO_NUM_16)
 #define UART_NUM (UART_NUM_1)
 #endif
-
-//tasks de la aplicacion de lcd
-#define SCL_PIN (GPIO_NUM_22)
-#define SDA_PIN (GPIO_NUM_21)
-#define I2C_NUM (I2C_NUM_1)
-#define LCD_ADDRESS 0x3C
 
 #endif /* MAIN_TASKS_COMMON_H_ */
