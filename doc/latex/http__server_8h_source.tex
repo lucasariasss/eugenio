@@ -1,0 +1,43 @@
+\doxysection{http\+\_\+server.\+h}
+\hypertarget{http__server_8h_source}{}\label{http__server_8h_source}\index{C:/Espressif/frameworks/esp-\/idf-\/v5.2.1/workspace/Tesis/main/http\_server.h@{C:/Espressif/frameworks/esp-\/idf-\/v5.2.1/workspace/Tesis/main/http\_server.h}}
+\mbox{\hyperlink{http__server_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#ifndef\ MAIN\_HTTP\_SERVER\_H\_}}
+\DoxyCodeLine{00015\ \textcolor{preprocessor}{\#define\ MAIN\_HTTP\_SERVER\_H\_}}
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ \textcolor{preprocessor}{\#include\ "{}freertos/FreeRTOS.h"{}}}
+\DoxyCodeLine{00018\ \textcolor{preprocessor}{\#include\ "{}freertos/queue.h"{}}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00023\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \mbox{\hyperlink{http__server_8h_a954842a930e3ec08480037f7fb7d79bc}{http\_server\_wifi\_connect\_status}}}
+\DoxyCodeLine{00024\ \{}
+\DoxyCodeLine{00025\ \ \ \ \ NONE\ =\ 0,}
+\DoxyCodeLine{00026\ \ \ \ \ HTTP\_WIFI\_STATUS\_CONNECTING,}
+\DoxyCodeLine{00027\ \ \ \ \ HTTP\_WIFI\_STATUS\_CONNECT\_FAILED,}
+\DoxyCodeLine{00028\ \ \ \ \ HTTP\_WIFI\_STATUS\_CONNECT\_SUCCESS,}
+\DoxyCodeLine{00029\ \ \ \ \ HTTP\_WIFI\_STATUS\_DISCONNECTED,}
+\DoxyCodeLine{00030\ \}\ \mbox{\hyperlink{http__server_8h_a94c46a0f2f039fae2e174938731cf5dc}{http\_server\_wifi\_connect\_status\_e}};}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00035\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \mbox{\hyperlink{http__server_8h_ab3e4b4d49519c9ebb9989dd6d6a680b0}{http\_server\_message}}}
+\DoxyCodeLine{00036\ \{}
+\DoxyCodeLine{00037\ \ \ \ \ HTTP\_MSG\_WIFI\_CONNECT\_INIT\ =\ 0,}
+\DoxyCodeLine{00038\ \ \ \ \ HTTP\_MSG\_WIFI\_CONNECT\_SUCCESS,}
+\DoxyCodeLine{00039\ \ \ \ \ HTTP\_MSG\_WIFI\_CONNECT\_FAIL,}
+\DoxyCodeLine{00040\ \ \ \ \ HTTP\_MSG\_WIFI\_USER\_DISCONNECT,}
+\DoxyCodeLine{00041\ \}\mbox{\hyperlink{http__server_8h_af3e42acc0daaaa0e7992f1be99d28e08}{http\_server\_message\_e}};}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00046\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structhttp__server__queue__message}{http\_server\_queue\_message}}}
+\DoxyCodeLine{00047\ \{}
+\DoxyCodeLine{00048\ \ \ \ \ \mbox{\hyperlink{http__server_8h_af3e42acc0daaaa0e7992f1be99d28e08}{http\_server\_message\_e}}\ msgID;}
+\DoxyCodeLine{00049\ \}\mbox{\hyperlink{http__server_8h_a28311d98817ae6c596066d8bb49a56f7}{http\_server\_queue\_message\_t}};}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00054\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{http__server_8h_ae5fb127f629ed9aecaba445bd1512221}{http\_server\_start}}(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00059\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{http__server_8h_afffb5f05a179c9702078a824048dab36}{http\_server\_stop}}(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00066\ BaseType\_t\ \mbox{\hyperlink{http__server_8h_aa40c7544f908043547e60dcba8a41963}{http\_server\_monitor\_send\_message}}(\mbox{\hyperlink{http__server_8h_af3e42acc0daaaa0e7992f1be99d28e08}{http\_server\_message\_e}}\ msgID);}
+\DoxyCodeLine{00067\ }
+\DoxyCodeLine{00068\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ MAIN\_HTTP\_SERVER\_H\_\ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

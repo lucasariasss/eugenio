@@ -1,0 +1,44 @@
+\doxysection{tasks\+\_\+common.\+h}
+\hypertarget{tasks__common_8h_source}{}\label{tasks__common_8h_source}\index{C:/Espressif/frameworks/esp-\/idf-\/v5.2.1/workspace/Tesis/main/tasks\_common.h@{C:/Espressif/frameworks/esp-\/idf-\/v5.2.1/workspace/Tesis/main/tasks\_common.h}}
+\mbox{\hyperlink{tasks__common_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00012\ }
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#ifndef\ MAIN\_TASKS\_COMMON\_H\_}}
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#define\ MAIN\_TASKS\_COMMON\_H\_}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{preprocessor}{\#define\ HAS\_STA\_MODE\ \ 0}\textcolor{comment}{//\ 0\ =\ sin\ modo\ estación,\ 1\ =\ con\ modo\ estación}}
+\DoxyCodeLine{00017\ }
+\DoxyCodeLine{00018\ \textcolor{comment}{//tasks\ de\ la\ app\ de\ wifi}}
+\DoxyCodeLine{00019\ \textcolor{preprocessor}{\#define\ WIFI\_APP\_TASK\_STACK\_SIZE\ \ \ \ \ \ \ \ \ \ \ \ 4096}}
+\DoxyCodeLine{00020\ \textcolor{preprocessor}{\#define\ WIFI\_APP\_TASK\_PRIORITY\ \ \ \ \ \ \ \ \ \ \ \ \ \ 2}}
+\DoxyCodeLine{00021\ \textcolor{preprocessor}{\#define\ WIFI\_APP\_TASK\_CORE\_ID\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0}}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \textcolor{comment}{//informacion\ de\ las\ tareas\ del\ servidor\ http}}
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#define\ HTTP\_SERVER\_TASK\_STACK\_SIZE\ \ \ \ \ \ \ \ \ 8192}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#define\ HTTP\_SERVER\_TASK\_PRIORITY\ \ \ \ \ \ \ \ \ \ \ 4}}
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#define\ HTTP\_SERVER\_TASK\_CORE\_ID\ \ \ \ \ \ \ \ \ \ \ \ 0}}
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00028\ \textcolor{comment}{//Monitoreo\ del\ servidor\ http}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#define\ HTTP\_SERVER\_MONITOR\_STACK\_SIZE\ \ \ \ \ \ 4096}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#define\ HTTP\_SERVER\_MONITOR\_PRIORITY\ \ \ \ \ \ \ \ 3}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#define\ HTTP\_SERVER\_MONITOR\_CORE\_ID\ \ \ \ \ \ \ \ \ 0}}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ \textcolor{comment}{//Controlador\ de\ uart}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#define\ BOOTLOADER\_UART\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#define\ UART\_APP\_TASK\_STACK\_SIZE\ \ \ \ \ \ \ \ \ \ \ \ 1024}}
+\DoxyCodeLine{00036\ }
+\DoxyCodeLine{00037\ \textcolor{comment}{//Definicion\ de\ la\ aplicacion\ de\ uart}}
+\DoxyCodeLine{00038\ \textcolor{preprocessor}{\#if\ defined(BOOTLOADER\_UART)\ \&\&\ (BOOTLOADER\_UART\ ==\ 1)}}
+\DoxyCodeLine{00039\ \textcolor{preprocessor}{\#define\ TXD\_PIN\ (GPIO\_NUM\_1)}}
+\DoxyCodeLine{00040\ \textcolor{preprocessor}{\#define\ RXD\_PIN\ (GPIO\_NUM\_3)}}
+\DoxyCodeLine{00041\ \textcolor{preprocessor}{\#define\ UART\_NUM\ (UART\_NUM\_0)}}
+\DoxyCodeLine{00042\ \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00043\ \textcolor{preprocessor}{\#define\ TXD\_PIN\ (GPIO\_NUM\_17)}}
+\DoxyCodeLine{00044\ \textcolor{preprocessor}{\#define\ RXD\_PIN\ (GPIO\_NUM\_16)}}
+\DoxyCodeLine{00045\ \textcolor{preprocessor}{\#define\ UART\_NUM\ (UART\_NUM\_1)}}
+\DoxyCodeLine{00046\ \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ MAIN\_TASKS\_COMMON\_H\_\ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}

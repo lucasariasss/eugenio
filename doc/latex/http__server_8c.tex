@@ -1,0 +1,154 @@
+\doxysection{C\+:/\+Espressif/frameworks/esp-\/idf-\/v5.2.1/workspace/\+Tesis/main/http\+\_\+server.c File Reference}
+\hypertarget{http__server_8c}{}\label{http__server_8c}\index{C:/Espressif/frameworks/esp-\/idf-\/v5.2.1/workspace/Tesis/main/http\_server.c@{C:/Espressif/frameworks/esp-\/idf-\/v5.2.1/workspace/Tesis/main/http\_server.c}}
+
+
+Implementación del servidor HTTP para el proyecto.  
+
+
+{\ttfamily \#include "{}esp\+\_\+http\+\_\+server.\+h"{}}\newline
+{\ttfamily \#include "{}esp\+\_\+log.\+h"{}}\newline
+{\ttfamily \#include "{}esp\+\_\+ota\+\_\+ops.\+h"{}}\newline
+{\ttfamily \#include "{}esp\+\_\+wifi.\+h"{}}\newline
+{\ttfamily \#include "{}esp\+\_\+timer.\+h"{}}\newline
+{\ttfamily \#include "{}sys/param.\+h"{}}\newline
+{\ttfamily \#include $<$c\+JSON.\+h$>$}\newline
+{\ttfamily \#include "{}http\+\_\+server.\+h"{}}\newline
+{\ttfamily \#include "{}tasks\+\_\+common.\+h"{}}\newline
+{\ttfamily \#include "{}wifi\+\_\+app.\+h"{}}\newline
+{\ttfamily \#include "{}uart\+\_\+app.\+h"{}}\newline
+\doxysubsubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{http__server_8c_a0fae115a5c0c96ef9113079ea7ccb2dd}{DEFINE\+\_\+\+STATIC\+\_\+\+HANDLER}}(name,  type,  start,  end)
+\begin{DoxyCompactList}\small\item\em Macro para definir un manejador de contenido estático. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{http__server_8c_a8ef26845cf712b3784a202859acc2e85}\label{http__server_8c_a8ef26845cf712b3784a202859acc2e85} 
+const uint8\+\_\+t jquery\+\_\+3\+\_\+3\+\_\+1\+\_\+min\+\_\+js\+\_\+start\mbox{[}$\,$\mbox{]} {\bfseries asm} ("{}\+\_\+binary\+\_\+jquery\+\_\+3\+\_\+3\+\_\+1\+\_\+min\+\_\+js\+\_\+start"{})
+\item 
+\Hypertarget{http__server_8c_a6638c0c14a9ef7f914c9198af2dada1b}\label{http__server_8c_a6638c0c14a9ef7f914c9198af2dada1b} 
+const uint8\+\_\+t jquery\+\_\+3\+\_\+3\+\_\+1\+\_\+min\+\_\+js\+\_\+end\mbox{[}$\,$\mbox{]} {\bfseries asm} ("{}\+\_\+binary\+\_\+jquery\+\_\+3\+\_\+3\+\_\+1\+\_\+min\+\_\+js\+\_\+end"{})
+\item 
+\Hypertarget{http__server_8c_aede8f0bb2c45776a5718d8e7b8acbb6a}\label{http__server_8c_aede8f0bb2c45776a5718d8e7b8acbb6a} 
+const uint8\+\_\+t index\+\_\+html\+\_\+start\mbox{[}$\,$\mbox{]} {\bfseries asm} ("{}\+\_\+binary\+\_\+index\+\_\+html\+\_\+start"{})
+\item 
+\Hypertarget{http__server_8c_a7b39f1fcc418da402de3d6966546ef7d}\label{http__server_8c_a7b39f1fcc418da402de3d6966546ef7d} 
+const uint8\+\_\+t index\+\_\+html\+\_\+end\mbox{[}$\,$\mbox{]} {\bfseries asm} ("{}\+\_\+binary\+\_\+index\+\_\+html\+\_\+end"{})
+\item 
+\Hypertarget{http__server_8c_a9244ba5260d10d4123426c271185e1be}\label{http__server_8c_a9244ba5260d10d4123426c271185e1be} 
+const uint8\+\_\+t app\+\_\+css\+\_\+start\mbox{[}$\,$\mbox{]} {\bfseries asm} ("{}\+\_\+binary\+\_\+app\+\_\+css\+\_\+start"{})
+\item 
+\Hypertarget{http__server_8c_aa24663d0779ecc33c5ad8e23fc43eb38}\label{http__server_8c_aa24663d0779ecc33c5ad8e23fc43eb38} 
+const uint8\+\_\+t app\+\_\+css\+\_\+end\mbox{[}$\,$\mbox{]} {\bfseries asm} ("{}\+\_\+binary\+\_\+app\+\_\+css\+\_\+end"{})
+\item 
+\Hypertarget{http__server_8c_ac26de1a80dac4a73d1b67c5008afc2e8}\label{http__server_8c_ac26de1a80dac4a73d1b67c5008afc2e8} 
+const uint8\+\_\+t app\+\_\+js\+\_\+start\mbox{[}$\,$\mbox{]} {\bfseries asm} ("{}\+\_\+binary\+\_\+app\+\_\+js\+\_\+start"{})
+\item 
+\Hypertarget{http__server_8c_afb40daa6bc7c43c57851110ab190fc4b}\label{http__server_8c_afb40daa6bc7c43c57851110ab190fc4b} 
+const uint8\+\_\+t app\+\_\+js\+\_\+end\mbox{[}$\,$\mbox{]} {\bfseries asm} ("{}\+\_\+binary\+\_\+app\+\_\+js\+\_\+end"{})
+\item 
+\Hypertarget{http__server_8c_a6b0380c4515b49f9f71d01a188fda1c4}\label{http__server_8c_a6b0380c4515b49f9f71d01a188fda1c4} 
+const uint8\+\_\+t favicon\+\_\+ico\+\_\+start\mbox{[}$\,$\mbox{]} {\bfseries asm} ("{}\+\_\+binary\+\_\+favicon\+\_\+ico\+\_\+start"{})
+\item 
+\Hypertarget{http__server_8c_ad4e8db8ceb133b2f52a893c00c559b5e}\label{http__server_8c_ad4e8db8ceb133b2f52a893c00c559b5e} 
+const uint8\+\_\+t favicon\+\_\+ico\+\_\+end\mbox{[}$\,$\mbox{]} {\bfseries asm} ("{}\+\_\+binary\+\_\+favicon\+\_\+ico\+\_\+end"{})
+\item 
+\Hypertarget{http__server_8c_aabd3b0501c74ebaf3b97ac6a8ce2f5ab}\label{http__server_8c_aabd3b0501c74ebaf3b97ac6a8ce2f5ab} 
+const uint8\+\_\+t model\+\_\+png\+\_\+start\mbox{[}$\,$\mbox{]} {\bfseries asm} ("{}\+\_\+binary\+\_\+model\+\_\+png\+\_\+start"{})
+\item 
+\Hypertarget{http__server_8c_a1c7e42247386ece6f7645f2ebfe085f8}\label{http__server_8c_a1c7e42247386ece6f7645f2ebfe085f8} 
+const uint8\+\_\+t model\+\_\+png\+\_\+end\mbox{[}$\,$\mbox{]} {\bfseries asm} ("{}\+\_\+binary\+\_\+model\+\_\+png\+\_\+end"{})
+\item 
+\Hypertarget{http__server_8c_a9aa03cba286e577a6cc68d9ebda7eafc}\label{http__server_8c_a9aa03cba286e577a6cc68d9ebda7eafc} 
+const uint8\+\_\+t logo\+\_\+png\+\_\+start\mbox{[}$\,$\mbox{]} {\bfseries asm} ("{}\+\_\+binary\+\_\+logo\+\_\+png\+\_\+start"{})
+\item 
+\Hypertarget{http__server_8c_a685786d2cab85d6ac15bfefdc918df60}\label{http__server_8c_a685786d2cab85d6ac15bfefdc918df60} 
+const uint8\+\_\+t logo\+\_\+png\+\_\+end\mbox{[}$\,$\mbox{]} {\bfseries asm} ("{}\+\_\+binary\+\_\+logo\+\_\+png\+\_\+end"{})
+\item 
+\Hypertarget{http__server_8c_ae5fb127f629ed9aecaba445bd1512221}\label{http__server_8c_ae5fb127f629ed9aecaba445bd1512221} 
+void {\bfseries http\+\_\+server\+\_\+start} (void)
+\begin{DoxyCompactList}\small\item\em Inicia el servidor HTTP si no está en ejecución. \end{DoxyCompactList}\item 
+\Hypertarget{http__server_8c_afffb5f05a179c9702078a824048dab36}\label{http__server_8c_afffb5f05a179c9702078a824048dab36} 
+void {\bfseries http\+\_\+server\+\_\+stop} (void)
+\begin{DoxyCompactList}\small\item\em Detiene el servidor HTTP y su tarea de monitoreo. \end{DoxyCompactList}\item 
+Base\+Type\+\_\+t \mbox{\hyperlink{http__server_8c_aa40c7544f908043547e60dcba8a41963}{http\+\_\+server\+\_\+monitor\+\_\+send\+\_\+message}} (\mbox{\hyperlink{http__server_8h_af3e42acc0daaaa0e7992f1be99d28e08}{http\+\_\+server\+\_\+message\+\_\+e}} msg\+ID)
+\begin{DoxyCompactList}\small\item\em Envía un mensaje al monitor del servidor HTTP. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{http__server_8c_a330bfd26fd1370bef5a4597c4d0553ec}\label{http__server_8c_a330bfd26fd1370bef5a4597c4d0553ec} 
+c\+JSON \texorpdfstring{$\ast$}{*} {\bfseries ENFERMEDAD}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Implementación del servidor HTTP para el proyecto. 
+
+Este archivo contiene las funciones y definiciones necesarias para la implementación del servidor HTTP utilizado en el proyecto de tesis.
+
+\begin{DoxyDate}{Date}
+5 de octubre de 2023 
+\end{DoxyDate}
+\begin{DoxyAuthor}{Author}
+arias 
+\end{DoxyAuthor}
+
+
+\label{doc-define-members}
+\Hypertarget{http__server_8c_doc-define-members}
+\doxysubsection{Macro Definition Documentation}
+\Hypertarget{http__server_8c_a0fae115a5c0c96ef9113079ea7ccb2dd}\index{http\_server.c@{http\_server.c}!DEFINE\_STATIC\_HANDLER@{DEFINE\_STATIC\_HANDLER}}
+\index{DEFINE\_STATIC\_HANDLER@{DEFINE\_STATIC\_HANDLER}!http\_server.c@{http\_server.c}}
+\doxysubsubsection{\texorpdfstring{DEFINE\_STATIC\_HANDLER}{DEFINE\_STATIC\_HANDLER}}
+{\footnotesize\ttfamily \label{http__server_8c_a0fae115a5c0c96ef9113079ea7ccb2dd} 
+\#define DEFINE\+\_\+\+STATIC\+\_\+\+HANDLER(\begin{DoxyParamCaption}\item[{}]{name}{, }\item[{}]{type}{, }\item[{}]{start}{, }\item[{}]{end}{}\end{DoxyParamCaption})}
+
+{\bfseries Value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\ \ \ \ \textcolor{keyword}{static}\ esp\_err\_t\ name(httpd\_req\_t\ *req)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}
+\DoxyCodeLine{\ \ \ \ \{\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \(\backslash\)}
+\DoxyCodeLine{\ \ \ \ \ \ \ \ \textcolor{keywordflow}{return}\ http\_server\_static\_handler(req,\ type,\ (\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *)start,\ (\textcolor{keyword}{const}\ \textcolor{keywordtype}{char}\ *)end);\ \(\backslash\)}
+\DoxyCodeLine{\ \ \ \ \}}
+
+\end{DoxyCode}
+
+
+Macro para definir un manejador de contenido estático. 
+
+Genera una función que atiende solicitudes HTTP y responde con el contenido estático especificado, utilizando http\+\_\+server\+\_\+static\+\_\+handler().
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & Nombre de la función a generar. \\
+\hline
+{\em type} & Tipo MIME del contenido (ej. "{}text/html"{}). \\
+\hline
+{\em start} & Puntero al inicio del contenido en memoria. \\
+\hline
+{\em end} & Puntero al final del contenido en memoria. \\
+\hline
+\end{DoxyParams}
+
+
+\label{doc-func-members}
+\Hypertarget{http__server_8c_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{http__server_8c_aa40c7544f908043547e60dcba8a41963}\index{http\_server.c@{http\_server.c}!http\_server\_monitor\_send\_message@{http\_server\_monitor\_send\_message}}
+\index{http\_server\_monitor\_send\_message@{http\_server\_monitor\_send\_message}!http\_server.c@{http\_server.c}}
+\doxysubsubsection{\texorpdfstring{http\_server\_monitor\_send\_message()}{http\_server\_monitor\_send\_message()}}
+{\footnotesize\ttfamily \label{http__server_8c_aa40c7544f908043547e60dcba8a41963} 
+Base\+Type\+\_\+t http\+\_\+server\+\_\+monitor\+\_\+send\+\_\+message (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{http__server_8h_af3e42acc0daaaa0e7992f1be99d28e08}{http\+\_\+server\+\_\+message\+\_\+e}}}]{msg\+ID}{}\end{DoxyParamCaption})}
+
+
+
+Envía un mensaje al monitor del servidor HTTP. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em msg\+ID} & Identificador del mensaje a enviar. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+pd\+PASS si el mensaje fue enviado correctamente, err\+QUEUE\+\_\+\+FULL en caso de error. 
+\end{DoxyReturn}

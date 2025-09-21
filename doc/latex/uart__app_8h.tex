@@ -1,0 +1,68 @@
+\doxysection{C\+:/\+Espressif/frameworks/esp-\/idf-\/v5.2.1/workspace/\+Tesis/main/uart\+\_\+app.h File Reference}
+\hypertarget{uart__app_8h}{}\label{uart__app_8h}\index{C:/Espressif/frameworks/esp-\/idf-\/v5.2.1/workspace/Tesis/main/uart\_app.h@{C:/Espressif/frameworks/esp-\/idf-\/v5.2.1/workspace/Tesis/main/uart\_app.h}}
+
+
+Declaraciones de funciones para la inicialización y envío de mensajes por UART usando ESP-\/\+IDF.  
+
+
+{\ttfamily \#include $<$c\+JSON.\+h$>$}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+esp\+\_\+err\+\_\+t \mbox{\hyperlink{uart__app_8h_af5d33caf44e08d2e491514c4f1811c25}{uart\+\_\+app\+\_\+init}} (void)
+\begin{DoxyCompactList}\small\item\em Inicializa la aplicación UART. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{uart__app_8h_a694354146e964517fec59fbd68923f46}{uart\+\_\+app\+\_\+send\+\_\+message}} (uint8\+\_\+t enfermedad)
+\begin{DoxyCompactList}\small\item\em Envía un mensaje con la enfermedad a través de la interfaz UART configurada. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Declaraciones de funciones para la inicialización y envío de mensajes por UART usando ESP-\/\+IDF. 
+
+\begin{DoxyAuthor}{Author}
+Lucas Arias (\href{mailto:1605137@ucc.edu.ar}{\texttt{1605137@ucc.\+edu.\+ar}}) 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+2024-\/09-\/8 
+\end{DoxyDate}
+
+
+\label{doc-func-members}
+\Hypertarget{uart__app_8h_doc-func-members}
+\doxysubsection{Function Documentation}
+\Hypertarget{uart__app_8h_af5d33caf44e08d2e491514c4f1811c25}\index{uart\_app.h@{uart\_app.h}!uart\_app\_init@{uart\_app\_init}}
+\index{uart\_app\_init@{uart\_app\_init}!uart\_app.h@{uart\_app.h}}
+\doxysubsubsection{\texorpdfstring{uart\_app\_init()}{uart\_app\_init()}}
+{\footnotesize\ttfamily \label{uart__app_8h_af5d33caf44e08d2e491514c4f1811c25} 
+esp\+\_\+err\+\_\+t uart\+\_\+app\+\_\+init (\begin{DoxyParamCaption}\item[{void}]{}{}\end{DoxyParamCaption})}
+
+
+
+Inicializa la aplicación UART. 
+
+Esta función configura y prepara el periférico UART para su uso en la aplicación. Normalmente incluye la configuración de parámetros como la velocidad en baudios, bits de datos, paridad, bits de parada y control de flujo, así como la instalación del driver UART y la asignación de los recursos necesarios.
+
+\begin{DoxyReturn}{Returns}
+
+\begin{DoxyItemize}
+\item ESP\+\_\+\+OK si la inicialización fue exitosa
+\item Código de error esp\+\_\+err\+\_\+t correspondiente en caso contrario 
+\end{DoxyItemize}
+\end{DoxyReturn}
+\Hypertarget{uart__app_8h_a694354146e964517fec59fbd68923f46}\index{uart\_app.h@{uart\_app.h}!uart\_app\_send\_message@{uart\_app\_send\_message}}
+\index{uart\_app\_send\_message@{uart\_app\_send\_message}!uart\_app.h@{uart\_app.h}}
+\doxysubsubsection{\texorpdfstring{uart\_app\_send\_message()}{uart\_app\_send\_message()}}
+{\footnotesize\ttfamily \label{uart__app_8h_a694354146e964517fec59fbd68923f46} 
+void uart\+\_\+app\+\_\+send\+\_\+message (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{enfermedad}{}\end{DoxyParamCaption})}
+
+
+
+Envía un mensaje con la enfermedad a través de la interfaz UART configurada. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em enfermedad} & variable uint8\+\_\+t que selecciona la enfermedad. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyNote}{Note}
+Asegúrese de que el driver UART esté inicializado antes de llamar a esta función. 
+\end{DoxyNote}

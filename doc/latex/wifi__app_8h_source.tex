@@ -1,0 +1,67 @@
+\doxysection{wifi\+\_\+app.\+h}
+\hypertarget{wifi__app_8h_source}{}\label{wifi__app_8h_source}\index{C:/Espressif/frameworks/esp-\/idf-\/v5.2.1/workspace/Tesis/main/wifi\_app.h@{C:/Espressif/frameworks/esp-\/idf-\/v5.2.1/workspace/Tesis/main/wifi\_app.h}}
+\mbox{\hyperlink{wifi__app_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00011\ }
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#ifndef\ MAIN\_WIFI\_APP\_H\_}}
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#define\ MAIN\_WIFI\_APP\_H\_}}
+\DoxyCodeLine{00014\ }
+\DoxyCodeLine{00015\ \textcolor{preprocessor}{\#include\ "{}esp\_netif.h"{}}\ \textcolor{comment}{//netif\ es\ network\ interface}}
+\DoxyCodeLine{00016\ \textcolor{preprocessor}{\#include\ "{}esp\_wifi\_types.h"{}}}
+\DoxyCodeLine{00017\ \textcolor{preprocessor}{\#include\ "{}freertos/FreeRTOS.h"{}}}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00019\ \textcolor{comment}{//\ Definición\ de\ tipo\ para\ el\ callback}}
+\DoxyCodeLine{00020\ \textcolor{keyword}{typedef}\ void\ (*wifi\_connected\_event\_callback\_t)(void);}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00022\ \textcolor{comment}{//CONFIGURACION\ DE\ APLICACION\ WIFI}}
+\DoxyCodeLine{00023\ \textcolor{preprocessor}{\#define\ WIFI\_AP\_SSID\ \ \ \ \ \ \ \ \ \ \ \ "{}Eugenio\_AP"{}}}
+\DoxyCodeLine{00024\ \textcolor{preprocessor}{\#define\ WIFI\_AP\_PASSWORD\ \ \ \ \ \ \ \ "{}password"{}}}
+\DoxyCodeLine{00025\ \textcolor{preprocessor}{\#define\ WIFI\_AP\_CHANNEL\ \ \ \ \ \ \ \ \ 1}}
+\DoxyCodeLine{00026\ \textcolor{preprocessor}{\#define\ WIFI\_AP\_SSID\_HIDDEN\ \ \ \ \ 0\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\textcolor{comment}{//\ 0=visible,\ 1=invisible}}
+\DoxyCodeLine{00027\ \textcolor{preprocessor}{\#define\ WIFI\_AP\_MAX\_CONNECTIONS\ 5}}
+\DoxyCodeLine{00028\ \textcolor{preprocessor}{\#define\ WIFI\_AP\_BEACON\_INTERVAL\ 100\ \ \ \ \ \ \ \ \ \ \ \ \ }\textcolor{comment}{//\ 100\ milisegundos}}
+\DoxyCodeLine{00029\ \textcolor{preprocessor}{\#define\ WIFI\_AP\_IP\ \ \ \ \ \ \ \ \ \ \ \ \ \ "{}192.168.0.1"{}\ \ \ }\textcolor{comment}{//\ El\ ip\ cuando\ esta\ como\ access\ point}}
+\DoxyCodeLine{00030\ \textcolor{preprocessor}{\#define\ WIFI\_AP\_GATEWAY\ \ \ \ \ \ \ \ \ "{}192.168.0.1"{}}}
+\DoxyCodeLine{00031\ \textcolor{preprocessor}{\#define\ WIFI\_AP\_NETMASK\ \ \ \ \ \ \ \ \ "{}255.255.255.0"{}}}
+\DoxyCodeLine{00032\ \textcolor{preprocessor}{\#define\ WIFI\_AP\_BANDWIDTH\ \ \ \ \ \ \ WIFI\_BW\_HT20\ \ \ \ }\textcolor{comment}{//\ 20MHz}}
+\DoxyCodeLine{00033\ \textcolor{preprocessor}{\#define\ WIFI\_STA\_POWER\_SAVE\ \ \ \ \ WIFI\_PS\_NONE\ \ \ \ }\textcolor{comment}{//\ No\ usa\ el\ power\ save}}
+\DoxyCodeLine{00034\ \textcolor{preprocessor}{\#define\ MAX\_SSID\_LENGTH\ \ \ \ \ \ \ \ \ 32\ \ \ \ \ \ \ \ \ \ \ \ \ \ }\textcolor{comment}{//\ Es\ el\ maximo\ establecido\ por\ la\ IEEE}}
+\DoxyCodeLine{00035\ \textcolor{preprocessor}{\#define\ MAX\_PASSWORD\_LENGTH\ \ \ \ \ 64\ \ \ \ \ \ \ \ \ \ \ \ \ \ }\textcolor{comment}{//\ Tambien\ es\ el\ maximo\ establecido\ por\ IEEE}}
+\DoxyCodeLine{00036\ \textcolor{preprocessor}{\#define\ MAX\_CONNECTION\_RETRIES\ \ 5\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\textcolor{comment}{//\ reintentos\ en\ desconexion}}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \textcolor{comment}{//objetos\ de\ la\ netif\ para\ la\ STATION\ y\ el\ ACCESS\ POINT}}
+\DoxyCodeLine{00039\ \textcolor{keyword}{extern}\ esp\_netif\_t*\ esp\_netif\_sta;}
+\DoxyCodeLine{00040\ \textcolor{keyword}{extern}\ esp\_netif\_t*\ esp\_netif\_ap;}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00045\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{enum}\ \mbox{\hyperlink{wifi__app_8h_a26ad8237f08c6c5ab891262cc7e175a7}{wifi\_app\_message}}}
+\DoxyCodeLine{00046\ \{}
+\DoxyCodeLine{00047\ \ \ \ \ WIFI\_APP\_MSG\_START\_HTTP\_SERVER\ =\ 0,\ \textcolor{comment}{//mandaremos\ esto\ para\ que\ lo\ reciba\ una\ task\ en\ rtos}}
+\DoxyCodeLine{00048\ \ \ \ \ WIFI\_APP\_MSG\_CONNECTING\_FROM\_HTTP\_SERVER,\ \textcolor{comment}{//\ le\ avisamos\ al\ wifi\ que\ se\ esta\ conectando\ a\ un\ server\ http}}
+\DoxyCodeLine{00049\ \ \ \ \ WIFI\_APP\_MSG\_STA\_CONNECTED\_GOT\_IP,\ \textcolor{comment}{//\ se\ le\ asigna\ un\ ip\ al\ router}}
+\DoxyCodeLine{00050\ \ \ \ \ WIFI\_APP\_MSG\_USER\_REQUESTED\_STA\_DISCONNECT,}
+\DoxyCodeLine{00051\ \ \ \ \ WIFI\_APP\_MSG\_LOAD\_SAVED\_CREDENTIALS,}
+\DoxyCodeLine{00052\ \ \ \ \ WIFI\_APP\_MSG\_STA\_DISCONNECTED,}
+\DoxyCodeLine{00053\ \}\ \mbox{\hyperlink{wifi__app_8h_a61d307eba4836dd61d2630d4bc513c08}{wifi\_app\_message\_e}};}
+\DoxyCodeLine{00054\ }
+\DoxyCodeLine{00058\ \textcolor{keyword}{typedef}\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{structwifi__app__queue__message}{wifi\_app\_queue\_message}}}
+\DoxyCodeLine{00059\ \{}
+\DoxyCodeLine{00060\ \ \ \ \ \mbox{\hyperlink{wifi__app_8h_a61d307eba4836dd61d2630d4bc513c08}{wifi\_app\_message\_e}}\ msgID;}
+\DoxyCodeLine{00061\ \}\ \mbox{\hyperlink{wifi__app_8h_a92e7931e4ccac09641270ca66333c912}{wifi\_app\_queue\_message\_t}};}
+\DoxyCodeLine{00062\ }
+\DoxyCodeLine{00068\ }
+\DoxyCodeLine{00069\ BaseType\_t\ \mbox{\hyperlink{wifi__app_8h_aec924a59c0eede746e90c5c04e682fc3}{wifi\_app\_send\_message}}(\mbox{\hyperlink{wifi__app_8h_a61d307eba4836dd61d2630d4bc513c08}{wifi\_app\_message\_e}}\ msgID);}
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00074\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{wifi__app_8h_ac2af98a9df667dec7b75c10a5717f09d}{wifi\_app\_start}}(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00075\ }
+\DoxyCodeLine{00080\ wifi\_config\_t*\ \mbox{\hyperlink{wifi__app_8h_acd6606606de84f405065531c1889432a}{wifi\_app\_get\_wifi\_config}}(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00081\ }
+\DoxyCodeLine{00086\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{wifi__app_8h_af79551f710f287fae05080e0b8e4de3b}{wifi\_app\_set\_callback}}(wifi\_connected\_event\_callback\_t\ cb);}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00091\ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{wifi__app_8h_a8da3123ee9e699631055034de29f9bb5}{wifi\_app\_call\_callback}}(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00097\ int8\_t\ \mbox{\hyperlink{wifi__app_8h_a5d07d8b446d099d9791b275a1635a33b}{wifi\_app\_get\_rssi}}(\textcolor{keywordtype}{void});}
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00099\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{/*\ MAIN\_WIFI\_APP\_H\_\ */}\textcolor{preprocessor}{}}
+
+\end{DoxyCode}
