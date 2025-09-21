@@ -1,8 +1,12 @@
-/*
- * wifi_app.c
+/**
+ * @file wifi_app.c
+ * @brief Implementación de las funcionalidades relacionadas con la aplicación WiFi.
  *
- *  Created on: Sep 26, 2023
- *      Author: arias
+ * Este archivo contiene las funciones y definiciones necesarias para la gestión
+ * y control de la conectividad WiFi en el proyecto.
+ *
+ * @date 26 de septiembre de 2023
+ * @author arias
  */
 
 #include "freertos/FreeRTOS.h"
@@ -47,14 +51,15 @@ static QueueHandle_t wifi_app_queue_handle;
 //netif objets para la station y el access point
 esp_netif_t* esp_netif_sta = NULL;
 esp_netif_t* esp_netif_ap = NULL;
-/**
- * gestor de eventos de la app de wifi
- * @param arg datos, a parte de los datos del evento que son pasados al gestor cuando es llamado
- * @param event_base el id base del evento para registrar el gestor
- * @param event_id el id con el que se registra el evento
- * @param event_data
- */
 
+/**
+ * @brief Maneja eventos de Wi-Fi e IP.
+ * @param arg Contexto del manejador (no usado).
+ * @param event_base Base del evento (WIFI_EVENT o IP_EVENT).
+ * @param event_id Identificador del evento.
+ * @param event_data Datos asociados al evento.
+ * @return void
+ */
 static void wifi_app_event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
 {
 	if(event_base == WIFI_EVENT)
@@ -118,8 +123,8 @@ static void wifi_app_event_handler(void *arg, esp_event_base_t event_base, int32
 	}
 }
 
-/*
- * inicializa la aplicacion wifi del gestor de eventos del wifi y del ip
+/**
+ * @brief Inicializa el loop de eventos y registra el manejador de eventos Wi-Fi e IP.
  */
 static void wifi_app_event_handler_init(void)
 {
@@ -134,7 +139,7 @@ static void wifi_app_event_handler_init(void)
 }
 
 /**
- * inicializa la pila TCP y la configuracion wifi predeterminada
+ * @brief Inicializa la pila TCP/IP y la configuración Wi-Fi por defecto (STA/AP).
  */
 static void wifi_app_default_wifi_init(void)
 {
@@ -150,7 +155,7 @@ static void wifi_app_default_wifi_init(void)
 }
 
 /**
- * configura el punto de acceso del wifi y le asigna al softip el ip estatico
+ * @brief Configura el modo access point y asigna un ip estatico.
  */
 
 static void wifi_app_soft_ap_config(void)
@@ -192,22 +197,19 @@ static void wifi_app_soft_ap_config(void)
 	ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_STA_POWER_SAVE));
 }
 
-/*
- * Conecta el ESP32 a un AP externo usando la configuración de estación actualizada
+/**
+ * @brief Configura la STA con la configuración actual y realiza la conexión.
  */
 static void wifi_app_connect_sta(void)
 {
-//#if HAS_STA_MODE != 1
-//	ESP_LOGW(TAG, "Modo estación no habilitado. Omitiendo intento de conexión.");
-//	return;
-//#endif // HAS_STA_MODE
 	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, wifi_app_get_wifi_config()));
 	ESP_ERROR_CHECK(esp_wifi_connect());
 }
 
-/* 	tarea principal de la aplicacion wifi
-*	@param pvParameters parametro que puede ser pasado a la tarea
-*/
+/**
+ * @brief Tarea principal de la aplicación Wi-Fi: inicializa subsistemas, inicia Wi-Fi/AP y procesa la cola de eventos.
+ * @param pvParameters Parámetros de la tarea
+ */
 static void wifi_app_task(void *pvParameters)
 {
 	wifi_app_queue_message_t msg;
@@ -396,10 +398,6 @@ int8_t wifi_app_get_rssi(void)
 	return wifi_data.rssi;
 }
 
-/**
- * Esta función inicializa y arranca la aplicación WiFi, configurando
- * las configuraciones necesarias y comenzando el proceso de conexión WiFi.
- */
 void wifi_app_start(void)
 {
 	ESP_LOGI(TAG, "STARTING WIFI APPLICATION");

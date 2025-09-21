@@ -1,8 +1,12 @@
-/*
- * wifi_app.h
+/**
+ * @file wifi_app.h
+ * @brief Declaraciones y definiciones para la aplicación WiFi.
  *
- *  Created on: Sep 26, 2023
- *      Author: arias
+ * Este archivo contiene las declaraciones de funciones, macros y estructuras
+ * necesarias para la gestión y operación de la funcionalidad WiFi en el proyecto.
+ *
+ * @date 26 de septiembre de 2023
+ * @author arias
  */
 
 #ifndef MAIN_WIFI_APP_H_
@@ -35,7 +39,9 @@ typedef void (*wifi_connected_event_callback_t)(void);
 extern esp_netif_t* esp_netif_sta;
 extern esp_netif_t* esp_netif_ap;
 
-//IDs de mensajes para el task manager del wifi
+/**
+ * IDs de mensajes para el task manager del wifi
+ */
 typedef enum wifi_app_message
 {
 	WIFI_APP_MSG_START_HTTP_SERVER = 0, //mandaremos esto para que lo reciba una task en rtos
@@ -44,46 +50,49 @@ typedef enum wifi_app_message
 	WIFI_APP_MSG_USER_REQUESTED_STA_DISCONNECT,
 	WIFI_APP_MSG_LOAD_SAVED_CREDENTIALS,
 	WIFI_APP_MSG_STA_DISCONNECTED,
-} wifi_app_message_e; //e de enum
+} wifi_app_message_e;
 
-//struct para la cola de mensajes
+/**
+ * @brief Mensaje de cola para la aplicación Wi-Fi.
+ */
 typedef struct wifi_app_queue_message
 {
 	wifi_app_message_e msgID;
 } wifi_app_queue_message_t;
 
-/*
- * envia un mensaje a la cola
- * @param msgID ID de mensaje desde wifi_app_msg_e enum
- * @return pdTRUE si un iten se mando con exito, sino pdFALSE
+/**
+ * @brief Envía un mensaje a la cola de la aplicación Wi-Fi.
+ * @param msgID Identificador del mensaje a enviar.
+ * @return pdTrue si el mensaje se encoló; errQUEUE_FULL si la cola está llena.
  */
 
 BaseType_t wifi_app_send_message(wifi_app_message_e msgID);
 
-/*
- * comienza la task de wifi en rtos
+/**
+ * @brief Inicia la aplicación Wi-Fi (configura logging, memoria, cola, eventos y tarea).
  */
-
 void wifi_app_start(void);
 
 /**
- * Obtiene la configuración de wifi
+ * @brief Obtiene el puntero a la configuración Wi-Fi.
+ * @return Puntero a la estructura de configuración Wi-Fi.
  */
 wifi_config_t* wifi_app_get_wifi_config(void);
 
 /**
- * Establece la función de callback
+ * @brief Establece el callback para el evento de conexión Wi-Fi.
+ * @param cb Función de callback a invocar cuando la STA obtiene conexión/IP.
  */
 void wifi_app_set_callback(wifi_connected_event_callback_t cb);
 
-/*
- * Llama a la función de callback
+/**
+ * @brief Invoca el callback del evento de conexión Wi-Fi.
  */
 void wifi_app_call_callback(void);
 
-/*
- * Obtiene el valor RSSI de la conexión WiFi.
- * @return nivel actual de RSSI
+/**
+ * @brief Obtiene el RSSI de la red Wi-Fi actual.
+ * @return Valor RSSI en dBm (int8_t).
  */
 int8_t wifi_app_get_rssi(void);
 
