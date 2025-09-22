@@ -92,6 +92,7 @@ static void wifi_app_event_handler(void *arg, esp_event_base_t event_base, int32
 
 		case WIFI_EVENT_STA_DISCONNECTED:
 			ESP_LOGI(TAG, "WIFI_EVENT_STA_DISCONNECTED");
+#if HAS_STA_MODE == 1
 
 			wifi_event_sta_disconnected_t *wifi_event_sta_disconnected = (wifi_event_sta_disconnected_t *)event_data;
 			printf("WIFI_EVENT_STA_DISCONNECTED, reason code %d\n", wifi_event_sta_disconnected -> reason);
@@ -105,10 +106,13 @@ static void wifi_app_event_handler(void *arg, esp_event_base_t event_base, int32
 			{
 				wifi_app_send_message(WIFI_APP_MSG_STA_DISCONNECTED);
 			}
-
+#else
+			wifi_app_send_message(WIFI_APP_MSG_STA_DISCONNECTED);
+#endif // HAS_STA_MODE
 			break;
 		}
 	}
+#if HAS_STA_MODE == 1
 	else if(event_base == IP_EVENT)
 	{
 		switch(event_id)
@@ -121,6 +125,7 @@ static void wifi_app_event_handler(void *arg, esp_event_base_t event_base, int32
 			break;
 		}
 	}
+#endif // HAS_STA_MODE
 }
 
 /**
@@ -131,11 +136,14 @@ static void wifi_app_event_handler_init(void)
 	//Loop del driver del wifi
 	ESP_ERROR_CHECK(esp_event_loop_create_default());
 
-	//gestor de evento para la coneccion
+	//gestor de evento para la conexion
 	esp_event_handler_instance_t instance_wifi_event;
-	esp_event_handler_instance_t instance_ip_event;
 	ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_app_event_handler, NULL, &instance_wifi_event));
+
+#if HAS_STA_MODE == 1
+	esp_event_handler_instance_t instance_ip_event;
     ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, ESP_EVENT_ANY_ID, &wifi_app_event_handler, NULL, &instance_ip_event));
+#endif // HAS_STA_MODE
 }
 
 /**
@@ -146,7 +154,7 @@ static void wifi_app_default_wifi_init(void)
 	//inicializa la pila TCP
 	ESP_ERROR_CHECK(esp_netif_init());
 
-	//configuracion predeterminada del wifi - las operaciones deben estar en este orden
+	//configuracion predeterminada del wifi
 	wifi_init_config_t wifi_init_config = WIFI_INIT_CONFIG_DEFAULT();
 	ESP_ERROR_CHECK(esp_wifi_init(&wifi_init_config));
 	ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
@@ -185,12 +193,12 @@ static void wifi_app_soft_ap_config(void)
 	inet_pton(AF_INET, WIFI_AP_NETMASK, &ap_ip_info.netmask);
 
 	ESP_ERROR_CHECK(esp_netif_set_ip_info(esp_netif_ap, &ap_ip_info)); 		//configura estaticamente la interfaz de red
-	ESP_ERROR_CHECK(esp_netif_dhcps_start(esp_netif_ap)); 					//comienza el servidor DHCP de la AP (para estaciones de coneccion como un telefono)
+	ESP_ERROR_CHECK(esp_netif_dhcps_start(esp_netif_ap)); 					//comienza el servidor DHCP de la AP (para estaciones de conexion como un telefono)
 
 #if HAS_STA_MODE == 1
 	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));	// define el modo como estacion o punto de acceso
 #else
-	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));		// define el modo como estacion
+	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));		// define el modo como punto de acceso
 #endif // HAS_STA_MODE
 	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &ap_config));		//setea la configuracion
 	ESP_ERROR_CHECK(esp_wifi_set_bandwidth(WIFI_IF_AP, WIFI_AP_BANDWIDTH));	//20MHz
@@ -387,15 +395,6 @@ void wifi_app_set_callback(wifi_connected_event_callback_t cb)
 void wifi_app_call_callback(void)
 {
 	wifi_connected_event_cb();
-}
-
-int8_t wifi_app_get_rssi(void)
-{
-	wifi_ap_record_t wifi_data;
-
-	ESP_ERROR_CHECK(esp_wifi_sta_get_ap_info(&wifi_data));
-
-	return wifi_data.rssi;
 }
 
 void wifi_app_start(void)
