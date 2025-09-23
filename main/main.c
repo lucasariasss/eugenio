@@ -18,11 +18,6 @@
 
 static const char TAG[] = "main";
 
-void wifi_application_connected_events(void)
-{
-	ESP_LOGI(TAG, "Aplicacion WiFi conectada");
-}
-
 void app_main(void)
 {
     // Initialize NVS
@@ -37,9 +32,6 @@ void app_main(void)
 
 	// Inicia Wifi
 	wifi_app_start();
-
-	// Configurar el callback para eventos de conexión
-	wifi_app_set_callback(&wifi_application_connected_events);
 
     ESP_LOGI(TAG, "Inicializando UART...");
     

@@ -26,9 +26,6 @@
 // tag para mensajes en monitor serie
 static const char TAG [] = "wifi_app";
 
-// Callback de la aplicación WiFi
-static wifi_connected_event_callback_t wifi_connected_event_cb;
-
 // Usado para devolver la configuración wifi
 wifi_config_t *wifi_config = NULL;
 
@@ -236,7 +233,12 @@ static void wifi_app_task(void *pvParameters)
 	ESP_ERROR_CHECK(esp_wifi_start());
 
 	//enviar el primer mensaje de evento
+#if HAS_STA_MODE == 1
 	wifi_app_send_message(WIFI_APP_MSG_LOAD_SAVED_CREDENTIALS);
+#else
+	// Con HAS_STA_MODE deshabilitado, iniciar directamente el servidor HTTP
+	wifi_app_send_message(WIFI_APP_MSG_START_HTTP_SERVER);
+#endif // HAS_STA_MODE
 
 	for(;;)
 	{
@@ -304,12 +306,6 @@ static void wifi_app_task(void *pvParameters)
 					if (eventBits & WIFI_APP_CONNECTING_FROM_HTTP_SERVER_BIT)
 					{
 						xEventGroupClearBits(wifi_app_event_group, WIFI_APP_CONNECTING_FROM_HTTP_SERVER_BIT);
-					}
-
-					// Verificar la devolución de llamada de conexión
-					if (wifi_connected_event_cb)
-					{
-						wifi_app_call_callback();
 					}
 
 					break;
@@ -385,16 +381,6 @@ BaseType_t wifi_app_send_message(wifi_app_message_e msgID)
 wifi_config_t* wifi_app_get_wifi_config(void)
 {
 	return wifi_config;
-}
-
-void wifi_app_set_callback(wifi_connected_event_callback_t cb)
-{
-	wifi_connected_event_cb = cb;
-}
-
-void wifi_app_call_callback(void)
-{
-	wifi_connected_event_cb();
 }
 
 void wifi_app_start(void)

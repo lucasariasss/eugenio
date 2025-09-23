@@ -16,9 +16,6 @@
 #include "esp_wifi_types.h"
 #include "freertos/FreeRTOS.h"
 
-// Definición de tipo para el callback
-typedef void (*wifi_connected_event_callback_t)(void);
-
 //CONFIGURACION DE APLICACION WIFI
 #define WIFI_AP_SSID 			"Eugenio_AP"
 #define WIFI_AP_PASSWORD		"password"
@@ -78,16 +75,5 @@ void wifi_app_start(void);
  * @return Puntero a la estructura de configuración Wi-Fi.
  */
 wifi_config_t* wifi_app_get_wifi_config(void);
-
-/**
- * @brief Establece el callback para el evento de conexión Wi-Fi.
- * @param cb Función de callback a invocar cuando la STA obtiene conexión/IP.
- */
-void wifi_app_set_callback(wifi_connected_event_callback_t cb);
-
-/**
- * @brief Invoca el callback del evento de conexión Wi-Fi.
- */
-void wifi_app_call_callback(void);
 
 #endif /* MAIN_WIFI_APP_H_ */
