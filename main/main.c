@@ -1,6 +1,5 @@
 // main.c (ESCLAVO) - ESP-IDF
 #include <stdio.h>
-#include <math.h>
 #include <sys/param.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -12,23 +11,15 @@
 #include "esp_log.h"
 #include "lwip/sockets.h"
 #include "lwip/netdb.h"
-#include "driver/ledc.h"
 
 #include "wifi_app.h"
 #include "lm35_app.h"
+#include "cooler_app.h"
 
 #define TAG "SLAVE"
 
 // UDP
 #define UDP_PORT     3333
-
-// PWM FAN
-#define FAN_PWM_PIN  GPIO_NUM_14
-#define FAN_FREQ_HZ  25000
-#define FAN_RES      LEDC_TIMER_10_BIT
-#define FAN_CH       LEDC_CHANNEL_0
-#define FAN_TM       LEDC_TIMER_0
-#define FAN_SPD      LEDC_HIGH_SPEED_MODE
 
 static float setpoint_c = 30.0f;
 
@@ -49,34 +40,6 @@ static void udp_open(void) {
         vTaskDelay(portMAX_DELAY);
     }
     ESP_LOGI(TAG, "UDP bind en *:%d", UDP_PORT);
-}
-
-static void cooler_app_pwm_init(void) {
-    ledc_timer_config_t tcfg = {
-        .speed_mode = FAN_SPD, .timer_num = FAN_TM,
-        .duty_resolution = FAN_RES, .freq_hz = FAN_FREQ_HZ, .clk_cfg = LEDC_AUTO_CLK
-    };
-    ledc_timer_config(&tcfg);
-    ledc_channel_config_t ccfg = {
-        .gpio_num = FAN_PWM_PIN, .speed_mode = FAN_SPD, .channel = FAN_CH,
-        .timer_sel = FAN_TM, .duty = 0, .hpoint = 0
-    };
-    ledc_channel_config(&ccfg);
-}
-
-static void cooler_app_set_pct(float pct){
-    if(pct<0) pct=0;
-    if(pct>100) pct=100;
-    uint32_t duty = lroundf(pct * 1023.0f / 100.0f);
-    ledc_set_duty(FAN_SPD, FAN_CH, duty);
-    ledc_update_duty(FAN_SPD, FAN_CH);
-}
-
-static float cooler_app_curve(float t, float sp){
-    float t0=sp, t100=sp+15.0f;
-    if (t<=t0) return 0;
-    if (t>=t100) return 100;
-    return (t - t0) * 100.0f / (t100 - t0);
 }
 
 // RX de comandos UDP: "HELLO" o "SET:<float>"

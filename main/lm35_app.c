@@ -8,8 +8,6 @@ static bool                      adc_cali_enabled = false;
 
 #define TAG "lm35_app: "
 
-int ch = 0;
-
 void lm35_app_init(void)
 {
     ESP_LOGI(TAG, "Inicializando ADC LM35...");
@@ -64,7 +62,7 @@ float lm35_app_celsius(void)
         mv = (avg * 3300) / 4095;
     }
 
-    if ((ch = getchar()) == 't')
+    if ((getchar()) == 't')
     {
         ESP_LOGI(TAG, "ADC raw %d -> %d mV -> %f c", avg, mv, (float)mv / 10.0f);
     }
