@@ -49,7 +49,7 @@ static void wifi_init_sta(void){
     ESP_LOGI(TAG, "Conectando a %s ...", STA_SSID);
 }
 
-static void udp_open(void){
+static void udp_open_master(void){
     udp_sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
     if (udp_sock < 0){ ESP_LOGE(TAG,"socket failed"); vTaskDelay(portMAX_DELAY); }
 
@@ -65,7 +65,7 @@ static void udp_open(void){
 }
 
 // RX de "TEMP:x.y"
-static void task_udp_rx(void *arg){
+static void task_udp_rx_master(void *arg){
     char buf[64];
     struct sockaddr_in src; socklen_t slen=sizeof(src);
     while (1){
@@ -118,9 +118,9 @@ void app_main(void){
     ESP_ERROR_CHECK(nvs_flash_init());
     wifi_init_sta();
     vTaskDelay(pdMS_TO_TICKS(1500)); // margen para DHCP
-    udp_open();
+    udp_open_master();
 
-    xTaskCreate(task_udp_rx,   "udp_rx",   3*1024, NULL, 6, NULL);
+    xTaskCreate(task_udp_rx_master,   "udp_rx",   3*1024, NULL, 6, NULL);
     xTaskCreate(task_print_5s, "print5s",  2*1024, NULL, 4, NULL);
     xTaskCreate(task_console,  "console",  4*1024, NULL, 5, NULL);
 }
