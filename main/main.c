@@ -6,10 +6,24 @@
 
 #include "wifi_app.h"
 #include "msg_app.h"
+#include "esp_log.h"
 
 #define THERMAL 0
 #define PIR_UNIT 0
 #define MASTER 1
+
+#if (THERMAL + PIR_UNIT + MASTER) > 1
+#error "Only one application role can be enabled at a time"
+#elif (THERMAL + PIR_UNIT + MASTER) == 0
+#error "At least one application role must be enabled"
+#endif
+
+#if MASTER == 1
+#include "lwip/netdb.h"
+#include "console_app.h"
+
+#define TAG "MASTER"
+#endif // MASTER
 
 #if THERMAL == 1
 #include "freertos/semphr.h"
@@ -42,9 +56,12 @@ static void task_sense_ctrl_tx(void *arg){
         vTaskDelayUntil(&last_sense, pdMS_TO_TICKS(100)); // 10 Hz
     }
 }
+#endif // THERMAL
 
 void app_main(void){
     ESP_ERROR_CHECK(nvs_flash_init());
+    ESP_LOGE(TAG, "App iniciada");
+#if THERMAL == 1
     wifi_app_init_softap();
     msg_app_open_slave();
     lm35_app_init();
@@ -53,29 +70,9 @@ void app_main(void){
 
     xTaskCreate(msg_app_task_rx_slave, "udp_rx", 3*1024, NULL, 6, NULL);
     xTaskCreate(task_sense_ctrl_tx, "sense_tx", 3*1024, NULL, 5, NULL);
-}
 #endif // THERMAL
 
-#if PIR_UNIT == 1
-#endif // PIR_UNIT
-
 #if MASTER == 1
-#include <stdlib.h>
-#include <math.h>
-#include <sys/param.h>
-#include "esp_wifi.h"
-#include "esp_event.h"
-#include "esp_system.h"
-#include "esp_netif.h"
-#include "esp_log.h"
-#include "lwip/netdb.h"
-
-#include "console_app.h"
-
-#define TAG "MASTER"
-
-void app_main(void){
-    ESP_ERROR_CHECK(nvs_flash_init());
     wifi_app_init_sta();
     vTaskDelay(pdMS_TO_TICKS(1500)); // margen para DHCP
     msg_app_open_master();
@@ -83,6 +80,5 @@ void app_main(void){
     xTaskCreate(msg_app_task_rx_master,   "udp_rx",   3*1024, NULL, 6, NULL);
     xTaskCreate(console_app_task_print_5s, "print5s",  2*1024, NULL, 4, NULL);
     xTaskCreate(console_app_task,  "console",  4*1024, NULL, 5, NULL);
-}
-
 #endif // MASTER
+}
