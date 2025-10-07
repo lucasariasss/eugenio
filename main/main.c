@@ -61,16 +61,6 @@ static void task_sense_ctrl_tx(void *arg){
 void app_main(void){
     ESP_ERROR_CHECK(nvs_flash_init());
     ESP_LOGE(TAG, "App iniciada");
-#if THERMAL == 1
-    wifi_app_init_softap();
-    msg_app_open_slave();
-    lm35_app_init();
-    cooler_app_pwm_init();
-    sock_mutex = xSemaphoreCreateMutex();
-
-    xTaskCreate(msg_app_task_rx_slave, "udp_rx", 3*1024, NULL, 6, NULL);
-    xTaskCreate(task_sense_ctrl_tx, "sense_tx", 3*1024, NULL, 5, NULL);
-#endif // THERMAL
 
 #if MASTER == 1
     wifi_app_init_sta();
@@ -81,4 +71,15 @@ void app_main(void){
     xTaskCreate(console_app_task_print_5s, "print5s",  2*1024, NULL, 4, NULL);
     xTaskCreate(console_app_task,  "console",  4*1024, NULL, 5, NULL);
 #endif // MASTER
+    
+#if THERMAL == 1
+    wifi_app_init_softap();
+    msg_app_open_slave();
+    lm35_app_init();
+    cooler_app_pwm_init();
+    sock_mutex = xSemaphoreCreateMutex();
+
+    xTaskCreate(msg_app_task_rx_slave, "udp_rx", 3*1024, NULL, 6, NULL);
+    xTaskCreate(task_sense_ctrl_tx, "sense_tx", 3*1024, NULL, 5, NULL);
+#endif // THERMAL
 }
