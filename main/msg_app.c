@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <stdlib.h> 
+#include <math.h>
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -14,9 +15,12 @@
 
 int udp_sock = -1;
 struct sockaddr_in master_addr = {0};
+struct sockaddr_in slave_addr;
+
 bool master_known = false;
 SemaphoreHandle_t sock_mutex = NULL;
 float setpoint_c = 30.0f;
+volatile float last_temp = NAN;
 
 #define TAG "msg_app: "
 
@@ -32,6 +36,21 @@ void msg_app_open_slave(void) {
         vTaskDelay(portMAX_DELAY);
     }
     ESP_LOGI(TAG, "UDP bind en *:%d", UDP_PORT);
+}
+
+void msg_app_open_master(void){
+    udp_sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
+    if (udp_sock < 0){ ESP_LOGE(TAG,"socket failed"); vTaskDelay(portMAX_DELAY); }
+
+    memset(&slave_addr, 0, sizeof(slave_addr));
+    slave_addr.sin_family = AF_INET;
+    slave_addr.sin_port = htons(UDP_PORT);
+    inet_pton(AF_INET, SLAVE_IP, &slave_addr.sin_addr);
+
+    // enviar HELLO para que el esclavo recuerde nuestra IP/puerto
+    const char *hello = "HELLO\n";
+    sendto(udp_sock, hello, strlen(hello), 0, (struct sockaddr*)&slave_addr, sizeof(slave_addr));
+    ESP_LOGI(TAG, "UDP listo hacia %s:%d", SLAVE_IP, UDP_PORT);
 }
 
 // RX de comandos UDP: "HELLO" o "SET:<float>"
@@ -51,6 +70,23 @@ void msg_app_task_rx_slave(void *arg){
                 float v = atof(buf+4);
                 if (v>0 && v<120){ setpoint_c = v; ESP_LOGI(TAG,"Nuevo setpoint: %.2f C", setpoint_c); }
             }
+        }
+    }
+}
+
+// RX de "TEMP:x.y"
+void msg_app_task_rx_master(void *arg){
+    char buf[64];
+    struct sockaddr_in src; socklen_t slen=sizeof(src);
+    while (1){
+        int n = recvfrom(udp_sock, buf, sizeof(buf)-1, 0, (struct sockaddr*)&src, &slen);
+        if (n>0){
+            buf[n]=0;
+            if (strncmp(buf,"TEMP:",5)==0){
+                last_temp = atof(buf+5);
+            }
+        } else {
+            vTaskDelay(pdMS_TO_TICKS(50));
         }
     }
 }
