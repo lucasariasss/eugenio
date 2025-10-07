@@ -8,9 +8,9 @@
 #include "msg_app.h"
 #include "esp_log.h"
 
+#define MASTER 1
 #define THERMAL 0
 #define PIR_UNIT 0
-#define MASTER 1
 
 #if (THERMAL + PIR_UNIT + MASTER) > 1
 #error "Only one application role can be enabled at a time"
