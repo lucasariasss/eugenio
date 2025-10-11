@@ -10,7 +10,7 @@
 #include "msg_app.h"
 #include "esp_log.h"
 
-#define SELECTOR 0b010
+#define SELECTOR 0b001
 #define MASTER   ((SELECTOR >> 0) & 1)
 #define THERMAL  ((SELECTOR >> 1) & 1)
 #define PIR_UNIT ((SELECTOR >> 2) & 1)
@@ -78,6 +78,10 @@ void app_main(void){
 #endif // MASTER
     
 #if THERMAL == 1
+    float sp = setpoint_c;
+    msg_app_setpoint_load_nvs(&sp);
+    if (sp > 0 && sp < 120) setpoint_c = sp;
+    ESP_LOGI("THERMAL", "Setpoint restaurado: %.2f C", setpoint_c);
     wifi_app_init_softap();
     msg_app_open_slave();
     lm35_app_init();
