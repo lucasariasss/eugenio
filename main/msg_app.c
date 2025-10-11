@@ -92,6 +92,7 @@ void msg_app_task_rx_master(void *arg){
             buf[n]=0;
             if (strncmp(buf,"TEMP:",5)==0){
                 last_temp = atof(buf+5);
+                last_temp_tick = xTaskGetTickCount();
             }
         } else {
             vTaskDelay(pdMS_TO_TICKS(50));
@@ -109,4 +110,18 @@ void msg_app_task_tx_hello(void *arg){
     }
     ESP_LOGI(TAG, "HELLO confirmado (ya llegan TEMP), detengo tx_hello");
     vTaskDelete(NULL);
+}
+
+void msg_app_task_link_supervisor(void *arg){
+    const TickType_t timeout = pdMS_TO_TICKS(3000);  // 3 s sin TEMP => relanzar HELLO
+    for(;;){
+        TickType_t now = xTaskGetTickCount();
+        bool stale = (last_temp_tick == 0) || ((now - last_temp_tick) > timeout);
+        if (stale){
+            const char *hello = "HELLO\n";
+            sendto(udp_sock, hello, strlen(hello), 0,
+                   (struct sockaddr*)&slave_addr, sizeof(slave_addr));
+        }
+        vTaskDelay(pdMS_TO_TICKS(500));  // reintento cada 500 ms
+    }
 }

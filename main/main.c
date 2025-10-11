@@ -10,13 +10,14 @@
 #include "msg_app.h"
 #include "esp_log.h"
 
-#define MASTER 1
-#define THERMAL 0
-#define PIR_UNIT 0
+#define SELECTOR 0b010
+#define MASTER   ((SELECTOR >> 0) & 1)
+#define THERMAL  ((SELECTOR >> 1) & 1)
+#define PIR_UNIT ((SELECTOR >> 2) & 1)
 
 #if (THERMAL + PIR_UNIT + MASTER) > 1
 #error "Only one application role can be enabled at a time"
-#elif (THERMAL + PIR_UNIT + MASTER) == 0
+#elif SELECTOR == 0
 #error "At least one application role must be enabled"
 #endif
 
@@ -71,6 +72,7 @@ void app_main(void){
 
     xTaskCreate(msg_app_task_tx_hello, "udp_tx_hello", 2*1024, NULL, 5, NULL);
     xTaskCreate(msg_app_task_rx_master,   "udp_rx",   3*1024, NULL, 6, NULL);
+    xTaskCreate(msg_app_task_link_supervisor,"link_supervisor",  2*1024, NULL, 4, NULL);
     xTaskCreate(console_app_task_print_5s, "print5s",  2*1024, NULL, 4, NULL);
     xTaskCreate(console_app_task,  "console",  4*1024, NULL, 5, NULL);
 #endif // MASTER
