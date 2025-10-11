@@ -1,3 +1,5 @@
+// cooler_app.h
+
 #ifndef COOLER_APP_H
 #define COOLER_APP_H
 

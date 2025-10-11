@@ -1,3 +1,5 @@
+// msg_app.c
+
 #include "msg_app.h"
 
 #include <string.h>
@@ -21,6 +23,7 @@ bool master_known = false;
 SemaphoreHandle_t sock_mutex = NULL;
 float setpoint_c = 30.0f;
 volatile float last_temp = NAN;
+volatile TickType_t last_temp_tick = 0;
 
 #define TAG "msg_app: "
 
@@ -41,6 +44,7 @@ void msg_app_open_slave(void) {
 void msg_app_open_master(void){
     udp_sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
     if (udp_sock < 0){ ESP_LOGE(TAG,"socket failed"); vTaskDelay(portMAX_DELAY); }
+    last_temp_tick = 0;
 
     memset(&slave_addr, 0, sizeof(slave_addr));
     slave_addr.sin_family = AF_INET;
@@ -70,6 +74,10 @@ void msg_app_task_rx_slave(void *arg){
                 float v = atof(buf+4);
                 if (v>0 && v<120){ setpoint_c = v; ESP_LOGI(TAG,"Nuevo setpoint: %.2f C", setpoint_c); }
             }
+            if (strncmp(buf, "HELLO", 5) == 0) {
+                char ip[16]; inet_ntop(AF_INET, &src.sin_addr, ip, sizeof(ip));
+                ESP_LOGI(TAG, "HELLO desde %s:%u", ip, ntohs(src.sin_port));
+            }
         }
     }
 }
@@ -89,4 +97,16 @@ void msg_app_task_rx_master(void *arg){
             vTaskDelay(pdMS_TO_TICKS(50));
         }
     }
+}
+
+void msg_app_task_tx_hello(void *arg){
+    // Reintenta hasta que last_temp deje de ser NaN (ya llegó algún TEMP)
+    while (isnan(last_temp)) {
+        const char *hello = "HELLO\n";
+        sendto(udp_sock, hello, strlen(hello), 0,
+               (struct sockaddr*)&slave_addr, sizeof(slave_addr));
+        vTaskDelay(pdMS_TO_TICKS(500));
+    }
+    ESP_LOGI(TAG, "HELLO confirmado (ya llegan TEMP), detengo tx_hello");
+    vTaskDelete(NULL);
 }

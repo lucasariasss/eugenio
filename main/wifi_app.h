@@ -1,3 +1,5 @@
+// wifi_app.h
+
 #ifndef WIFI_APP_H
 #define WIFI_APP_H
 
@@ -14,5 +16,7 @@
 void wifi_app_init_softap(void);
 
 void wifi_app_init_sta(void);
+
+void wifi_app_wait_sta_ip(void);
 
 #endif // WIFI_APP_H

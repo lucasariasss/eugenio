@@ -1,3 +1,5 @@
+// main.c
+
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -64,9 +66,10 @@ void app_main(void){
 
 #if MASTER == 1
     wifi_app_init_sta();
-    vTaskDelay(pdMS_TO_TICKS(1500)); // margen para DHCP
+    wifi_app_wait_sta_ip();  
     msg_app_open_master();
 
+    xTaskCreate(msg_app_task_tx_hello, "udp_tx_hello", 2*1024, NULL, 5, NULL);
     xTaskCreate(msg_app_task_rx_master,   "udp_rx",   3*1024, NULL, 6, NULL);
     xTaskCreate(console_app_task_print_5s, "print5s",  2*1024, NULL, 4, NULL);
     xTaskCreate(console_app_task,  "console",  4*1024, NULL, 5, NULL);
