@@ -64,7 +64,7 @@ float lm35_app_celsius(void)
 
     if ((getchar()) == 't')
     {
-        ESP_LOGI(TAG, "ADC raw %d -> %d mV -> %f c", avg, mv, (float)mv / 10.0f);
+        ESP_LOGI(TAG, "ADC raw %d -> %d mV -> %.2f c", avg, mv, (float)mv / 10.0f);
     }
     
 

@@ -37,6 +37,11 @@ static float parse_float(const char* s, int *ok){
 
 void console_app_task_print_5s(void *arg){
     while (1){
+        const char *hello = "HELLO\n";
+        sendto(udp_sock, hello, strlen(hello), 0,
+        (struct sockaddr*)&slave_addr, sizeof(slave_addr));
+
+
         if (!isnan(last_temp)) ESP_LOGI(TAG, "[Maestro] Temp actual: %.2f C (SP=%.2f)", last_temp, setpoint_c);
         else                   ESP_LOGI(TAG, "[Maestro] Esperando TEMP... (SP=%.2f)", setpoint_c);
         vTaskDelay(pdMS_TO_TICKS(5000));

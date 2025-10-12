@@ -85,7 +85,6 @@ void msg_app_task_rx_slave(void *arg){
             }
             if (strncmp(buf, "HELLO", 5) == 0) {
                 char ip[16]; inet_ntop(AF_INET, &src.sin_addr, ip, sizeof(ip));
-                ESP_LOGI(TAG, "HELLO desde %s:%u", ip, ntohs(src.sin_port));
             }
         }
     }
