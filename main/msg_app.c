@@ -8,7 +8,6 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "freertos/semphr.h"
 
 #include "esp_log.h"
 
@@ -16,10 +15,10 @@
 #include "lwip/sockets.h"
 
 int udp_sock = -1;
-struct sockaddr_in master_addr = {0};
+volatile struct sockaddr_in master_addr = {0};
 struct sockaddr_in slave_addr;
 
-bool master_known = false;
+volatile bool master_known = false;
 SemaphoreHandle_t sock_mutex = NULL;
 float setpoint_c = 30.0f;
 volatile float last_temp = NAN;
@@ -67,10 +66,7 @@ void msg_app_task_rx_slave(void *arg){
         int n = recvfrom(udp_sock, buf, sizeof(buf)-1, 0, (struct sockaddr*)&src, &slen);
         if (n>0){
             buf[n]=0;
-            // Recordar master para telemetría
-            xSemaphoreTake(sock_mutex, portMAX_DELAY);
             master_addr = src; master_known = true;
-            xSemaphoreGive(sock_mutex);
 
             if (strncmp(buf,"SET:",4)==0){
                 float v = atof(buf+4);
