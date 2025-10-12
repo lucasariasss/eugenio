@@ -19,7 +19,6 @@ extern bool master_known;
 extern SemaphoreHandle_t sock_mutex;
 extern float setpoint_c;
 extern volatile float last_temp;
-extern volatile TickType_t last_temp_tick;
 
 void msg_app_open_slave(void);
 void msg_app_open_master(void);

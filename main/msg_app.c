@@ -23,7 +23,7 @@ bool master_known = false;
 SemaphoreHandle_t sock_mutex = NULL;
 float setpoint_c = 30.0f;
 volatile float last_temp = NAN;
-volatile TickType_t last_temp_tick = 0;
+static TickType_t last_temp_tick = 0;
 
 #define TAG "msg_app: "
 
