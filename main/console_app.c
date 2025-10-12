@@ -35,16 +35,6 @@ static float parse_float(const char* s, int *ok){
     return v;
 }
 
-void console_app_task_print_5s(void *arg){
-    while (1){
-        if (!isnan(last_temp))
-            ESP_LOGI(TAG, "[Maestro] Temp actual: %.2f C (SP=%.2f)", last_temp, setpoint_c);
-        else
-            ESP_LOGI(TAG, "[Maestro] Esperando TEMP... (SP=%.2f)", setpoint_c);
-        vTaskDelay(pdMS_TO_TICKS(5000));
-    }
-}
-
 void console_app_task(void *arg){
     char line[128];
     while (1){
@@ -65,6 +55,13 @@ void console_app_task(void *arg){
             sendto(udp_sock, out, len, 0, (struct sockaddr*)&slave_addr, sizeof(slave_addr));
             setpoint_c = v;
             ESP_LOGI(TAG, "Setpoint %.2f C enviado.", v);
+        }
+        else if (strncmp(line, "t", 1)==0)
+        {
+            if (!isnan(last_temp))
+                ESP_LOGI(TAG, "[Maestro] Temp actual: %.2f C (SP=%.2f)", last_temp, setpoint_c);
+            else
+                ESP_LOGI(TAG, "[Maestro] Esperando TEMP... (SP=%.2f)", setpoint_c);
         }
         else {
             ESP_LOGE(TAG, "Comando no reconocido.");
