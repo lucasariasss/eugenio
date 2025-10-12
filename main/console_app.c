@@ -11,7 +11,11 @@
 #include "freertos/task.h"
 #include "lwip/sockets.h"
 
+#include "esp_log.h"
+
 #include "msg_app.h"   // udp_sock, slave_addr, last_temp, setpoint_c
+
+#define TAG "console_app: "
 
 // Helpers
 static void trim(char *s){
@@ -33,8 +37,8 @@ static float parse_float(const char* s, int *ok){
 
 void console_app_task_print_5s(void *arg){
     while (1){
-        if (!isnan(last_temp)) printf("[Maestro] Temp actual: %.2f C (SP=%.2f)\n", last_temp, setpoint_c);
-        else                   printf("[Maestro] Esperando TEMP... (SP=%.2f)\n", setpoint_c);
+        if (!isnan(last_temp)) ESP_LOGI(TAG, "[Maestro] Temp actual: %.2f C (SP=%.2f)", last_temp, setpoint_c);
+        else                   ESP_LOGI(TAG, "[Maestro] Esperando TEMP... (SP=%.2f)", setpoint_c);
         vTaskDelay(pdMS_TO_TICKS(5000));
     }
 }
@@ -52,7 +56,7 @@ void console_app_task(void *arg){
             while (isspace((unsigned char)*argp)) argp++;
             int ok=0; float v = parse_float(argp, &ok);
             if (!ok || !(v>0 && v<120)){
-                puts("Error: valor inválido. Rango: 0<SP<120");
+                ESP_LOGE(TAG, "Error: valor inválido. Rango: 0<SP<120");
                 continue;
             }
             char out[32]; int len = snprintf(out, sizeof(out), "SET:%.2f\n", v);
@@ -61,10 +65,10 @@ void console_app_task(void *arg){
             const char *hello = "HELLO\n";
             sendto(udp_sock, hello, strlen(hello), 0, (struct sockaddr*)&slave_addr, sizeof(slave_addr));
             setpoint_c = v;
-            printf("Setpoint %.2f C enviado.\n", v);
+            ESP_LOGI(TAG, "Setpoint %.2f C enviado.", v);
         }
         else {
-            puts("Comando no reconocido. Anda a hacerte culiar.");
+            ESP_LOGE(TAG, "Comando no reconocido.");
         }
     }
 }

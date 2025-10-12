@@ -10,7 +10,6 @@
 #include "freertos/event_groups.h"
 
 #define TAG "wifi_app: "
-
 #define WIFI_GOT_IP_BIT  BIT0
 
 static void wifi_sta_got_ip_handler(void* arg,
@@ -46,13 +45,14 @@ void wifi_app_init_softap(void) {
              AP_SSID, AP_PASS, AP_CHANNEL);
 }
 
-void wifi_app_init_sta(void){
+void wifi_app_connect_sta(void){
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
     esp_netif_create_default_wifi_sta();
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+
     wifi_config_t wc = {0};
     strcpy((char*)wc.sta.ssid, STA_SSID);
     strcpy((char*)wc.sta.password, STA_PASS);
@@ -63,9 +63,7 @@ void wifi_app_init_sta(void){
     ESP_ERROR_CHECK(esp_wifi_start());
     ESP_ERROR_CHECK(esp_wifi_connect());
     ESP_LOGI(TAG, "Conectando a %s ...", STA_SSID);
-}
-
-void wifi_app_wait_sta_ip(void){
+    
     EventGroupHandle_t eg = xEventGroupCreate();
     esp_event_handler_instance_t inst = NULL;
 
@@ -87,4 +85,6 @@ void wifi_app_wait_sta_ip(void){
     ESP_ERROR_CHECK(esp_event_handler_instance_unregister(
         IP_EVENT, IP_EVENT_STA_GOT_IP, inst));
     vEventGroupDelete(eg);
+
+    ESP_LOGI(TAG, "STA lista con IP.");
 }

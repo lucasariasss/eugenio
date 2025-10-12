@@ -10,7 +10,7 @@
 #include "msg_app.h"
 #include "esp_log.h"
 
-#define SELECTOR 0b10
+#define SELECTOR 0b01
 #define MASTER   ((SELECTOR >> 0) & 1)
 #define THERMAL  ((SELECTOR >> 1) & 1)
 
@@ -65,8 +65,7 @@ void app_main(void){
     ESP_LOGE(TAG, "App iniciada");
 
 #if MASTER == 1
-    wifi_app_init_sta();
-    wifi_app_wait_sta_ip();  
+    wifi_app_connect_sta();
     msg_app_open_master();
 
     xTaskCreate(msg_app_task_tx_hello, "udp_tx_hello", 2*1024, NULL, 5, NULL);

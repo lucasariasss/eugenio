@@ -15,8 +15,6 @@
 
 void wifi_app_init_softap(void);
 
-void wifi_app_init_sta(void);
-
-void wifi_app_wait_sta_ip(void);
+void wifi_app_connect_sta(void);
 
 #endif // WIFI_APP_H
