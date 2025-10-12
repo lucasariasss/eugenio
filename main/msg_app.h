@@ -25,7 +25,5 @@ void msg_app_open_slave(void);
 void msg_app_open_master(void);
 void msg_app_task_rx_slave(void *arg);
 void msg_app_task_rx_master(void *arg);
-esp_err_t msg_app_setpoint_save_nvs(float v);
-void msg_app_setpoint_load_nvs(float *out);
 
 #endif // MSG_APP_H_
