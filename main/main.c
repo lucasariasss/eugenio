@@ -10,12 +10,11 @@
 #include "msg_app.h"
 #include "esp_log.h"
 
-#define SELECTOR 0b001
+#define SELECTOR 0b10
 #define MASTER   ((SELECTOR >> 0) & 1)
 #define THERMAL  ((SELECTOR >> 1) & 1)
-#define PIR_UNIT ((SELECTOR >> 2) & 1)
 
-#if (THERMAL + PIR_UNIT + MASTER) > 1
+#if (THERMAL + MASTER) > 1
 #error "Only one application role can be enabled at a time"
 #elif SELECTOR == 0
 #error "At least one application role must be enabled"
