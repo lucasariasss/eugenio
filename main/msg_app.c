@@ -48,12 +48,14 @@ void msg_app_open_master(void){
     if (udp_sock < 0){ ESP_LOGE(TAG,"socket failed"); vTaskDelay(portMAX_DELAY); }
     last_temp_tick = 0;
 
+    struct timeval tv = { .tv_sec = 0, .tv_usec = 200 * 1000 };
+    setsockopt(udp_sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+
     memset(&slave_addr, 0, sizeof(slave_addr));
     slave_addr.sin_family = AF_INET;
     slave_addr.sin_port = htons(UDP_PORT);
     inet_pton(AF_INET, SLAVE_IP, &slave_addr.sin_addr);
 
-    // enviar HELLO para que el esclavo recuerde nuestra IP/puerto
     const char *hello = "HELLO\n";
     sendto(udp_sock, hello, strlen(hello), 0, (struct sockaddr*)&slave_addr, sizeof(slave_addr));
     ESP_LOGI(TAG, "UDP listo hacia %s:%d", SLAVE_IP, UDP_PORT);
@@ -93,6 +95,10 @@ void msg_app_task_rx_slave(void *arg){
 void msg_app_task_rx_master(void *arg){
     char buf[64];
     struct sockaddr_in src; socklen_t slen=sizeof(src);
+
+    const TickType_t hello_timeout = pdMS_TO_TICKS(1000); // si pasa 1s sin TEMP -> HELLO
+    TickType_t now;
+
     while (1){
         int n = recvfrom(udp_sock, buf, sizeof(buf)-1, 0, (struct sockaddr*)&src, &slen);
         if (n>0){
@@ -102,36 +108,16 @@ void msg_app_task_rx_master(void *arg){
                 last_temp_tick = xTaskGetTickCount();
             }
         } else {
-            vTaskDelay(pdMS_TO_TICKS(50));
+            now = xTaskGetTickCount();
+            bool stale = (last_temp_tick == 0) || ((now - last_temp_tick) > hello_timeout);
+            if (stale){
+                static const char *hello = "HELLO\n";
+                sendto(udp_sock, hello, strlen(hello), 0, (struct sockaddr*)&slave_addr, sizeof(slave_addr));
+            }
         }
     }
 }
 
-void msg_app_task_tx_hello(void *arg){
-    // Reintenta hasta que last_temp deje de ser NaN (ya llegó algún TEMP)
-    while (isnan(last_temp)) {
-        const char *hello = "HELLO\n";
-        sendto(udp_sock, hello, strlen(hello), 0,
-               (struct sockaddr*)&slave_addr, sizeof(slave_addr));
-        vTaskDelay(pdMS_TO_TICKS(500));
-    }
-    ESP_LOGI(TAG, "HELLO confirmado (ya llegan TEMP), detengo tx_hello");
-    vTaskDelete(NULL);
-}
-
-void msg_app_task_link_supervisor(void *arg){
-    const TickType_t timeout = pdMS_TO_TICKS(3000);  // 3 s sin TEMP => relanzar HELLO
-    for(;;){
-        TickType_t now = xTaskGetTickCount();
-        bool stale = (last_temp_tick == 0) || ((now - last_temp_tick) > timeout);
-        if (stale){
-            const char *hello = "HELLO\n";
-            sendto(udp_sock, hello, strlen(hello), 0,
-                   (struct sockaddr*)&slave_addr, sizeof(slave_addr));
-        }
-        vTaskDelay(pdMS_TO_TICKS(500));  // reintento cada 500 ms
-    }
-}
 
 esp_err_t msg_app_setpoint_save_nvs(float v){
     nvs_handle_t h; esp_err_t err = nvs_open("app", NVS_READWRITE, &h);

@@ -21,12 +21,10 @@ extern float setpoint_c;
 extern volatile float last_temp;
 extern volatile TickType_t last_temp_tick;
 
-void msg_app_task_link_supervisor(void *arg);
 void msg_app_open_slave(void);
 void msg_app_open_master(void);
 void msg_app_task_rx_slave(void *arg);
 void msg_app_task_rx_master(void *arg);
-void msg_app_task_tx_hello(void *arg);
 esp_err_t msg_app_setpoint_save_nvs(float v);
 void msg_app_setpoint_load_nvs(float *out);
 

@@ -10,7 +10,7 @@
 #include "msg_app.h"
 #include "esp_log.h"
 
-#define SELECTOR 0b01
+#define SELECTOR 0b10
 #define MASTER   ((SELECTOR >> 0) & 1)
 #define THERMAL  ((SELECTOR >> 1) & 1)
 
@@ -68,9 +68,7 @@ void app_main(void){
     wifi_app_connect_sta();
     msg_app_open_master();
 
-    xTaskCreate(msg_app_task_tx_hello, "udp_tx_hello", 2*1024, NULL, 5, NULL);
     xTaskCreate(msg_app_task_rx_master,   "udp_rx",   3*1024, NULL, 6, NULL);
-    xTaskCreate(msg_app_task_link_supervisor,"link_supervisor",  2*1024, NULL, 4, NULL);
     xTaskCreate(console_app_task_print_5s, "print5s",  2*1024, NULL, 4, NULL);
     xTaskCreate(console_app_task,  "console",  4*1024, NULL, 5, NULL);
 #endif // MASTER
