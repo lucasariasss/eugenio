@@ -35,6 +35,10 @@ static void wifi_app_stack_init(void) {
 }
 
 static void wifi_app_config(wifi_mode_t mode, wifi_config_t *wifi_config) {
+    if(mode != WIFI_MODE_STA && mode != WIFI_MODE_AP) {
+        ESP_LOGE(TAG, "Modo WiFi inválido");
+        return;
+    }
     ESP_ERROR_CHECK(esp_wifi_set_mode(mode));
     ESP_ERROR_CHECK(esp_wifi_set_config((mode==WIFI_MODE_STA)? WIFI_IF_STA : WIFI_IF_AP,wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
