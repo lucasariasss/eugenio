@@ -9,6 +9,8 @@
 #include "esp_netif.h"
 #include "freertos/event_groups.h"
 
+#include "app_role.h"
+
 #define TAG "wifi_app: "
 #define WIFI_GOT_IP_BIT  BIT0
 
@@ -20,13 +22,29 @@ static void wifi_sta_got_ip_handler(void* arg,
     xEventGroupSetBits((EventGroupHandle_t)arg, WIFI_GOT_IP_BIT);
 }
 
-void wifi_app_init_softap(void) {
+static void wifi_app_stack_init(void) {
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
+#if MASTER == 1
+    esp_netif_create_default_wifi_sta();
+#elif THERMAL == 1
     esp_netif_create_default_wifi_ap();
-
+#endif
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+}
+
+static void wifi_app_config(wifi_mode_t mode, wifi_config_t *wifi_config) {
+    ESP_ERROR_CHECK(esp_wifi_set_mode(mode));
+    ESP_ERROR_CHECK(esp_wifi_set_config((mode==WIFI_MODE_STA)? WIFI_IF_STA : WIFI_IF_AP,wifi_config));
+    ESP_ERROR_CHECK(esp_wifi_start());
+    if (mode == WIFI_MODE_STA) {
+        ESP_ERROR_CHECK(esp_wifi_connect());
+    }
+}
+
+void wifi_app_init_softap(void) {
+    wifi_app_stack_init();
 
     wifi_config_t wifi_config = { 0 };
     strcpy((char*)wifi_config.ap.ssid, AP_SSID);
@@ -37,31 +55,22 @@ void wifi_app_init_softap(void) {
     wifi_config.ap.authmode = WIFI_AUTH_WPA_WPA2_PSK;
     if (strlen(AP_PASS) == 0) wifi_config.ap.authmode = WIFI_AUTH_OPEN;
 
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
-    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
-    ESP_ERROR_CHECK(esp_wifi_start());
+    wifi_app_config(WIFI_MODE_AP, &wifi_config);
 
     ESP_LOGI(TAG, "SoftAP iniciado: SSID=%s, pass=%s, canal=%d",
              AP_SSID, AP_PASS, AP_CHANNEL);
 }
 
 void wifi_app_connect_sta(void){
-    ESP_ERROR_CHECK(esp_netif_init());
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
-    esp_netif_create_default_wifi_sta();
+    wifi_app_stack_init();
 
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+    wifi_config_t wifi_config = {0};
+    strcpy((char*)wifi_config.sta.ssid, STA_SSID);
+    strcpy((char*)wifi_config.sta.password, STA_PASS);
+    wifi_config.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
 
-    wifi_config_t wc = {0};
-    strcpy((char*)wc.sta.ssid, STA_SSID);
-    strcpy((char*)wc.sta.password, STA_PASS);
-    wc.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
+    wifi_app_config(WIFI_MODE_STA, &wifi_config);
 
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wc));
-    ESP_ERROR_CHECK(esp_wifi_start());
-    ESP_ERROR_CHECK(esp_wifi_connect());
     ESP_LOGI(TAG, "Conectando a %s ...", STA_SSID);
     
     EventGroupHandle_t eg = xEventGroupCreate();
