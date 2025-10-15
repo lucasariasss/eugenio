@@ -9,15 +9,7 @@
 #include "msg_app.h"
 #include "esp_log.h"
 
-#define SELECTOR 0b01
-#define MASTER   ((SELECTOR >> 0) & 1)
-#define THERMAL  ((SELECTOR >> 1) & 1)
-
-#if (THERMAL + MASTER) > 1
-#error "Only one application role can be enabled at a time"
-#elif SELECTOR == 0
-#error "At least one application role must be enabled"
-#endif
+#include "app_role.h"
 
 #if MASTER == 1
 #include "console_app.h"
@@ -62,7 +54,6 @@ void app_main(void){
     wifi_app_connect_sta();
     msg_app_open_master();
 
-    xTaskCreate(msg_app_task_rx_master,   "udp_rx",   3*1024, NULL, 6, NULL);
     xTaskCreate(console_app_task,  "console",  4*1024, NULL, 5, NULL);
 #endif // MASTER
     
@@ -73,7 +64,8 @@ void app_main(void){
     lm35_app_init();
     cooler_app_pwm_init();
 
-    xTaskCreate(msg_app_task_rx_slave, "udp_rx", 3*1024, NULL, 6, NULL);
     xTaskCreate(task_sense_ctrl_tx, "sense_tx", 3*1024, NULL, 5, NULL);
 #endif // THERMAL
+
+    xTaskCreate(msg_app_task_rx, "udp_rx", 3*1024, NULL, 6, NULL);
 }

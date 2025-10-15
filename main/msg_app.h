@@ -20,7 +20,6 @@ extern volatile float last_temp;
 
 void msg_app_open_slave(void);
 void msg_app_open_master(void);
-void msg_app_task_rx_slave(void *arg);
-void msg_app_task_rx_master(void *arg);
+void msg_app_task_rx(void *arg);
 
 #endif // MSG_APP_H_

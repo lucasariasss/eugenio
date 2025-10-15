@@ -14,6 +14,8 @@
 #include "lwip/inet.h"
 #include "lwip/sockets.h"
 
+#include "app_role.h"
+
 int udp_sock = -1;
 volatile struct sockaddr_in master_addr = {0};
 struct sockaddr_in slave_addr;
@@ -58,14 +60,18 @@ void msg_app_open_master(void){
     ESP_LOGI(TAG, "UDP listo hacia %s:%d", SLAVE_IP, UDP_PORT);
 }
 
-// RX de comandos UDP: "HELLO" o "SET:<float>"
-void msg_app_task_rx_slave(void *arg){
+void msg_app_task_rx(void *arg){
     char buf[64];
     struct sockaddr_in src; socklen_t slen=sizeof(src);
-    while (1) {
+#if MASTER == 1
+    const TickType_t hello_timeout = pdMS_TO_TICKS(1000); // si pasa 1s sin TEMP -> HELLO
+    TickType_t now;
+#endif
+    while (1){
         int n = recvfrom(udp_sock, buf, sizeof(buf)-1, 0, (struct sockaddr*)&src, &slen);
         if (n>0){
             buf[n]=0;
+#if THERMAL == 1
             master_addr = src; master_known = true;
 
             if (strncmp(buf,"SET:",4)==0){
@@ -79,22 +85,8 @@ void msg_app_task_rx_slave(void *arg){
             if (strncmp(buf, "HELLO", 5) == 0) {
                 char ip[16]; inet_ntop(AF_INET, &src.sin_addr, ip, sizeof(ip));
             }
-        }
-    }
-}
-
-// RX de "TEMP:x.y"
-void msg_app_task_rx_master(void *arg){
-    char buf[64];
-    struct sockaddr_in src; socklen_t slen=sizeof(src);
-
-    const TickType_t hello_timeout = pdMS_TO_TICKS(1000); // si pasa 1s sin TEMP -> HELLO
-    TickType_t now;
-
-    while (1){
-        int n = recvfrom(udp_sock, buf, sizeof(buf)-1, 0, (struct sockaddr*)&src, &slen);
-        if (n>0){
-            buf[n]=0;
+#endif // THERMAL
+#if MASTER == 1
             if (strncmp(buf,"TEMP:",5)==0){
                 last_temp = atof(buf+5);
                 last_temp_tick = xTaskGetTickCount();
@@ -106,6 +98,7 @@ void msg_app_task_rx_master(void *arg){
                 static const char *hello = "HELLO\n";
                 sendto(udp_sock, hello, strlen(hello), 0, (struct sockaddr*)&slave_addr, sizeof(slave_addr));
             }
+#endif // MASTER
         }
     }
 }
