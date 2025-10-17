@@ -17,4 +17,6 @@ void cooler_app_set_pct(float pct);
 
 float cooler_app_curve(float t, float sp);
 
+void cooler_app_task_sense_ctrl_tx(void *arg);
+
 #endif // COOLER_APP_H

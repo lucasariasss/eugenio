@@ -1,6 +1,8 @@
 // cooler_app.c
 
 #include "cooler_app.h"
+#include "lm35_app.h"
+#include "msg_app.h"
 #include "esp_log.h"
 #include "driver/ledc.h"
 #include <math.h>
@@ -30,13 +32,17 @@ static inline float clampf(float x, float lo, float hi){
    - Enciende a partir de (SP + DELTA_ON_C) con DUTY_MIN_ON
    - Llega a 100% en (SP + 5°C)  (ajustable)
 */
-static float curve_linear(float tc, float sp){
+static float cooler_app_funcion_lineal(float temp, float sp){
     float x0 = sp + DELTA_ON_C;
     float x1 = sp + 5.0f; // a +5°C del setpoint queremos full
-    if (tc <= x0) return 0.0f;
-    if (tc >= x1) return DUTY_MAX;
-    float t = (tc - x0) / (x1 - x0);
-    return DUTY_MIN_ON + t * (DUTY_MAX - DUTY_MIN_ON);
+
+    if (temp <= x0) return 0.0f;
+    if (temp >= x1) return DUTY_MAX;
+
+    float l0a1 = (temp - x0) / (x1 - x0);
+    float l25a100 = DUTY_MIN_ON + l0a1 * (DUTY_MAX - DUTY_MIN_ON);
+
+    return clampf(l25a100, DUTY_MIN_ON, DUTY_MAX);
 }
 
 /* ====== Init PWM ====== */
@@ -101,6 +107,27 @@ float cooler_app_curve(float tc, float sp){
 
     if (!fan_on) return 0.0f;
 
-    float pct = curve_linear(tc, sp);
-    return clampf(pct, DUTY_MIN_ON, DUTY_MAX);
+    return cooler_app_funcion_lineal(tc, sp);
+}
+
+// Sensado + control + TX periódica "TEMP:x.y"
+void cooler_app_task_sense_ctrl_tx(void *arg){
+    TickType_t last_sense = xTaskGetTickCount();
+    TickType_t last_tx = xTaskGetTickCount();
+    char line[32];
+
+    while (1){
+        float tc = lm35_app_celsius();
+        float pct = cooler_app_curve(tc, setpoint_c);
+        cooler_app_set_pct(pct);
+
+        if (xTaskGetTickCount() - last_tx >= pdMS_TO_TICKS(1000)){
+            int len = snprintf(line, sizeof(line), "TEMP:%.2f\n", tc);
+            bool ok = master_known;
+            struct sockaddr_in dst = master_addr;
+            if (ok) sendto(udp_sock, line, len, 0, (struct sockaddr*)&dst, sizeof(dst));
+            last_tx = xTaskGetTickCount();
+        }
+        vTaskDelayUntil(&last_sense, pdMS_TO_TICKS(100)); // 10 Hz
+    }
 }

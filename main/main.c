@@ -22,28 +22,6 @@
 #include "cooler_app.h"
 
 #define TAG "THERMAL"
-
-// Sensado + control + TX periódica "TEMP:x.y"
-static void task_sense_ctrl_tx(void *arg){
-    TickType_t last_sense = xTaskGetTickCount();
-    TickType_t last_tx = xTaskGetTickCount();
-    char line[32];
-
-    while (1){
-        float tc = lm35_app_celsius();
-        float pct = cooler_app_curve(tc, setpoint_c);
-        cooler_app_set_pct(pct);
-
-        if (xTaskGetTickCount() - last_tx >= pdMS_TO_TICKS(1000)){
-            int len = snprintf(line, sizeof(line), "TEMP:%.2f\n", tc);
-            bool ok = master_known;
-            struct sockaddr_in dst = master_addr;
-            if (ok) sendto(udp_sock, line, len, 0, (struct sockaddr*)&dst, sizeof(dst));
-            last_tx = xTaskGetTickCount();
-        }
-        vTaskDelayUntil(&last_sense, pdMS_TO_TICKS(100)); // 10 Hz
-    }
-}
 #endif // THERMAL
 
 void app_main(void){
@@ -64,7 +42,7 @@ void app_main(void){
     lm35_app_init();
     cooler_app_pwm_init();
 
-    xTaskCreate(task_sense_ctrl_tx, "sense_tx", 3*1024, NULL, 5, NULL);
+    xTaskCreate(cooler_app_task_sense_ctrl_tx, "sense_tx", 3*1024, NULL, 5, NULL);
 #endif // THERMAL
 
     xTaskCreate(msg_app_task_rx, "udp_rx", 3*1024, NULL, 6, NULL);

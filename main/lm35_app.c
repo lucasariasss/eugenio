@@ -44,6 +44,7 @@ void lm35_app_init(void)
 #endif
 }
 
+// toma 16 samples de las lecturas ADC, las promedia, y convierte a mV luego a °C (10 mV/°C)
 float lm35_app_celsius(void)
 {
     const int samples = 16;

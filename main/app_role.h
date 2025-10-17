@@ -2,7 +2,7 @@
 #ifndef APP_ROLE_H
 #define APP_ROLE_H
 
-#define SELECTOR 0b01
+#define SELECTOR 0b10
 #define MASTER   ((SELECTOR >> 0) & 1)
 #define THERMAL  ((SELECTOR >> 1) & 1)
 
