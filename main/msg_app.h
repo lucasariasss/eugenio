@@ -8,13 +8,14 @@
 #include "lwip/sockets.h" 
 
 #define UDP_PORT 3333
-#define SLAVE_IP   "192.168.4.1"  // IP por defecto del SoftAP del ESP32
+#define MASTER_IP "192.168.4.1"   // IP por defecto del SoftAP del maestro
 
 extern int udp_sock;
 extern volatile struct sockaddr_in master_addr;
 extern struct sockaddr_in slave_addr;
 
 extern volatile bool master_known;
+extern volatile bool slave_known;
 extern float setpoint_c;
 extern volatile float last_temp;
 

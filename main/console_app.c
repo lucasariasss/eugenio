@@ -51,6 +51,10 @@ void console_app_task(void *arg){
                 ESP_LOGE(TAG, "Error: valor inválido. Rango: 0<SP<120");
                 continue;
             }
+            if (!slave_known) {
+                ESP_LOGE(TAG, "No hay esclavo conectado.");
+                continue;
+            }
             char out[32]; int len = snprintf(out, sizeof(out), "SET:%.2f\n", v);
             sendto(udp_sock, out, len, 0, (struct sockaddr*)&slave_addr, sizeof(slave_addr));
             setpoint_c = v;

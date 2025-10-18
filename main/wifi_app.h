@@ -9,7 +9,7 @@
 #define AP_CHANNEL   1
 #define AP_MAX_CONN  2
 
-// Conexión al AP del esclavo
+// Conexion al AP del maestro
 #define STA_SSID   "LM35_SLAVE_AP"
 #define STA_PASS   "12345678"
 

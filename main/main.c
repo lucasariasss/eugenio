@@ -29,15 +29,15 @@ void app_main(void){
     ESP_LOGE(TAG, "App iniciada");
 
 #if MASTER == 1
-    wifi_app_connect_sta();
+    wifi_app_init_softap();
     msg_app_open_master();
 
     xTaskCreate(console_app_task,  "console",  4*1024, NULL, 5, NULL);
 #endif // MASTER
     
 #if THERMAL == 1
+    wifi_app_connect_sta();
     ESP_LOGI("THERMAL", "Setpoint restaurado: %.2f C", setpoint_c);
-    wifi_app_init_softap();
     msg_app_open_slave();
     lm35_app_init();
     cooler_app_pwm_init();
