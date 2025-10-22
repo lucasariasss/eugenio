@@ -65,7 +65,7 @@ void cooler_app_pwm_init(void) {
     ledc_channel_config(&ccfg);
 }
 
-/* ====== Aplicación del PWM con kick-start y duty mínimo ====== */
+/* ====== Aplicación del PWM con duty mínimo ====== */
 void cooler_app_set_duty_percent(float duty_percent){
     duty_percent = clampf(duty_percent, 0.0f, 100.0f);
 
