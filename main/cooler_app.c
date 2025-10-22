@@ -17,11 +17,9 @@ static const float DUTY_MIN_ON   = 25.0f;   // % mínimo mientras el fan está O
 static const float DUTY_MAX      = 100.0f;  // % máximo
 static const float DELTA_ON_C    = 0.7f;    // encender cuando T >= SP + 0.7°C
 static const float DELTA_OFF_C   = 0.4f;    // apagar cuando T <= SP - 0.4°C
-static const int   KICK_MS       = 250;     // pulso a 100% al encender (ms)
 
 /* ====== Estado interno ====== */
 static bool  fan_on   = false;
-static float last_pct = 0.0f;
 
 /* ====== Utilidades ====== */
 static inline float clampf(float x, float lo, float hi){
@@ -68,31 +66,21 @@ void cooler_app_pwm_init(void) {
 }
 
 /* ====== Aplicación del PWM con kick-start y duty mínimo ====== */
-void cooler_app_set_pct(float pct){
-    pct = clampf(pct, 0.0f, 100.0f);
-
-    // Kick-start: transición 0 -> >0
-    if (last_pct <= 0.5f && pct > 0.5f) {
-        // Pulso a 100% para vencer fricción/estática
-        int duty_kick = 1023; // 10 bits (LEDC_TIMER_10_BIT)
-        ledc_set_duty(FAN_SPD, FAN_CH, duty_kick);
-        ledc_update_duty(FAN_SPD, FAN_CH);
-        vTaskDelay(pdMS_TO_TICKS(KICK_MS));
-    }
+void cooler_app_set_duty_percent(float duty_percent){
+    duty_percent = clampf(duty_percent, 0.0f, 100.0f);
 
     // Si está encendido y el % es bajo, respetar duty mínimo
-    if (pct > 0.0f && pct < DUTY_MIN_ON) pct = DUTY_MIN_ON;
+    if (duty_percent > 0.0f && duty_percent < DUTY_MIN_ON) duty_percent = DUTY_MIN_ON;
 
-    int duty = lroundf(pct * 1023.0f / 100.0f); // 10-bit: 0..1023
+    int duty = lroundf(duty_percent * 1023.0f / 100.0f); // 10-bit: 0..1023
     ledc_set_duty(FAN_SPD, FAN_CH, duty);
     ledc_update_duty(FAN_SPD, FAN_CH);
 
     
     if ((getchar()) == 't')
     {
-        ESP_LOGI(TAG, "FAN = %.1f%% (duty=%d)", pct, duty);
+        ESP_LOGI(TAG, "FAN = %.1f%% (duty=%d)", duty_percent, duty);
     }
-    last_pct = pct;
 }
 
 /* ====== Curva con histeresis ======
@@ -117,12 +105,12 @@ void cooler_app_task_sense_ctrl_tx(void *arg){
     char line[32];
 
     while (1){
-        float tc = lm35_app_celsius();
-        float pct = cooler_app_curve(tc, setpoint_c);
-        cooler_app_set_pct(pct);
+        float temp_c = lm35_app_celsius();
+        float duty_percent = cooler_app_curve(temp_c, setpoint_c);
+        cooler_app_set_duty_percent(duty_percent);
 
         if (xTaskGetTickCount() - last_tx >= pdMS_TO_TICKS(1000)){
-            int len = snprintf(line, sizeof(line), "TEMP:%.2f\n", tc);
+            int len = snprintf(line, sizeof(line), "TEMP:%.2f\n", temp_c);
             bool ok = master_known;
             struct sockaddr_in dst = master_addr;
             if (ok) sendto(udp_sock, line, len, 0, (struct sockaddr*)&dst, sizeof(dst));

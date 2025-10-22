@@ -20,20 +20,7 @@ void lm35_app_init(void)
         .bitwidth = LM35_BITW,
         .atten    = LM35_ATTEN,
     };
-    ESP_ERROR_CHECK(adc_oneshot_config_channel(adc_handle, LM35_ADC_CH, &chan_cfg));
-
-    // Calibración (usa eFuse si está disponible)
-#if ADC_CALI_SCHEME_CURVE_FITTING_SUPPORTED
-    adc_cali_curve_fitting_config_t cali_cfg = {
-        .unit_id  = ADC_UNIT_1,
-        .atten    = LM35_ATTEN,
-        .bitwidth = LM35_BITW,
-    };
-    if (adc_cali_create_scheme_curve_fitting(&cali_cfg, &adc_cali_handle) == ESP_OK) {
-        adc_cali_enabled = true;
-    }
-#elif ADC_CALI_SCHEME_LINE_FITTING_SUPPORTED
-    adc_cali_line_fitting_config_t cali_cfg = {
+    ESP_ERROR_CHECK(adc_oneshot_config_channel(adc_handle, LM35_ADC_CH, &chan_cfg));    adc_cali_line_fitting_config_t cali_cfg = {
         .unit_id  = ADC_UNIT_1,
         .atten    = LM35_ATTEN,
         .bitwidth = LM35_BITW,
@@ -41,7 +28,6 @@ void lm35_app_init(void)
     if (adc_cali_create_scheme_line_fitting(&cali_cfg, &adc_cali_handle) == ESP_OK) {
         adc_cali_enabled = true;
     }
-#endif
 }
 
 // toma 16 samples de las lecturas ADC, las promedia, y convierte a mV luego a °C (10 mV/°C)

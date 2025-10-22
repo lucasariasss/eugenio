@@ -17,7 +17,7 @@
 #include "app_role.h"
 
 int udp_sock = -1;
-volatile struct sockaddr_in master_addr = {0};
+struct sockaddr_in master_addr = {0};
 struct sockaddr_in slave_addr = {0};
 
 volatile bool master_known = false;
