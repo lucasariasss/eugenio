@@ -96,10 +96,6 @@ void msg_app_task_rx(void *arg){
                     ESP_LOGI(TAG,"Nuevo setpoint: %.2f C", setpoint_c); 
                 }
             }
-            if (strncmp(buf, "HELLO", 5) == 0) {
-                char ip[16]; inet_ntop(AF_INET, &src.sin_addr, ip, sizeof(ip));
-                ESP_LOGI(TAG, "HELLO recibido del maestro %s", ip);
-            }
 #endif // THERMAL
 #if MASTER == 1
             slave_addr = src; slave_known = true;
@@ -107,7 +103,7 @@ void msg_app_task_rx(void *arg){
             if (strncmp(buf, "HELLO", 5) == 0) {
                 char ip[16]; inet_ntop(AF_INET, &src.sin_addr, ip, sizeof(ip));
                 ESP_LOGI(TAG, "HELLO recibido desde esclavo %s", ip);
-                last_temp_tick = xTaskGetTickCount(); // mantiene vivo el watchdog HELLO
+                last_temp_tick = xTaskGetTickCount(); 
                 continue;
             }
             if (strncmp(buf,"TEMP:",5)==0){
