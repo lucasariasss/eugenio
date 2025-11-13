@@ -13,7 +13,25 @@
 #ifndef MAIN_TASKS_COMMON_H_
 #define MAIN_TASKS_COMMON_H_
 
-#define HAS_STA_MODE  0// 0 = sin modo estación, 1 = con modo estación
+#define HAS_STA_MODE  0 // 0 = sin modo estación, 1 = con modo estación
+
+#if HAS_STA_MODE == 0
+#define INDEX_START "_binary_index_html_start"
+#define INDEX_END   "_binary_index_html_end"
+#define CSS_START   "_binary_app_css_start"
+#define CSS_END     "_binary_app_css_end"
+#define JS_START    "_binary_app_js_start"
+#define JS_END      "_binary_app_js_end"
+#elif HAS_STA_MODE == 1
+#define INDEX_START "_binary_index_sta_html_start"
+#define INDEX_END   "_binary_index_sta_html_end"
+#define CSS_START   "_binary_app_sta_css_start"
+#define CSS_END     "_binary_app_sta_css_end"
+#define JS_START    "_binary_app_sta_js_start"
+#define JS_END      "_binary_app_sta_js_end"
+#else
+#error "HAS_STA_MODE debe ser 0 (AP) o 1 (STA)"
+#endif
 
 //tasks de la app de wifi
 #define WIFI_APP_TASK_STACK_SIZE			4096

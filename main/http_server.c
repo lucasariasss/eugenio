@@ -40,15 +40,15 @@ static QueueHandle_t http_server_monitor_queue_handle;
 // Definicion de la enfermedad que se enviara por UART
 cJSON *ENFERMEDAD;
 
-// archivos embebidos: jquery, index.html, app.css, app.js, favicon.ico model.png y logo.png
+// archivos embebidos: index.html, app.css, app.js, jquery, favicon.ico model.png y logo.png
+extern const uint8_t index_html_start[] asm(INDEX_START);
+extern const uint8_t index_html_end[] asm(INDEX_END);
+extern const uint8_t app_css_start[] asm(CSS_START);
+extern const uint8_t app_css_end[] asm(CSS_END);
+extern const uint8_t app_js_start[] asm(JS_START);
+extern const uint8_t app_js_end[] asm(JS_END);
 extern const uint8_t jquery_3_3_1_min_js_start[] asm("_binary_jquery_3_3_1_min_js_start");
 extern const uint8_t jquery_3_3_1_min_js_end[] asm("_binary_jquery_3_3_1_min_js_end");
-extern const uint8_t index_html_start[] asm("_binary_index_html_start");
-extern const uint8_t index_html_end[] asm("_binary_index_html_end");
-extern const uint8_t app_css_start[] asm("_binary_app_css_start");
-extern const uint8_t app_css_end[] asm("_binary_app_css_end");
-extern const uint8_t app_js_start[] asm("_binary_app_js_start");
-extern const uint8_t app_js_end[] asm("_binary_app_js_end");
 extern const uint8_t favicon_ico_start[] asm("_binary_favicon_ico_start");
 extern const uint8_t favicon_ico_end[] asm("_binary_favicon_ico_end");
 extern const uint8_t model_png_start[] asm("_binary_model_png_start");

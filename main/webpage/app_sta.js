@@ -207,7 +207,7 @@ function showPassword()
 	}
 }
 
-/* 5.2. DESCONECCION*/
+/* 5.2. DESCONEXION*/
 /*
  * 5.2.1. Desconecta el wifi una vez que se aprieta el boton
  */

@@ -4,5 +4,15 @@
 idf_component_register(
     SRCS 				main.c wifi_app.c http_server.c app_nvs.c uart_app.c       # list the source files of this component
     INCLUDE_DIRS        "."			 # optional, add here public include directories
-						EMBED_FILES webpage/app.css webpage/app.js webpage/logo.png webpage/favicon.ico webpage/model.png webpage/index.html webpage/jquery-3.3.1.min.js
+    EMBED_FILES
+        "webpage/index.html"
+        "webpage/app.css"
+        "webpage/app.js"
+        "webpage/index_sta.html"
+        "webpage/app_sta.css"
+        "webpage/app_sta.js"
+        "webpage/favicon.ico"
+        "webpage/jquery-3.3.1.min.js"
+        "webpage/logo.png"
+        "webpage/model.png"
 )
