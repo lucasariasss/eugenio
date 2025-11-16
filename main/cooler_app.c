@@ -105,8 +105,15 @@ void cooler_app_task_sense_ctrl_tx(void *arg){
     char line[32];
 
     while (1){
-        float temp_c = lm35_app_celsius();
-        float duty_percent = cooler_app_curve(temp_c, setpoint_c);
+        float temp_c = lm35_app_celsius(), duty_percent = 0.0f;
+        int pir = g_pir, sw  = g_sw;
+        float sp = g_setpoint;         
+        switch (g_cool_src) {
+            case COOL_SRC_TEMP:   duty_percent = cooler_app_curve(temp_c, sp); break;
+            case COOL_SRC_PIR:    duty_percent = pir ? 100.0f : 0.0f;          break;
+            case COOL_SRC_SWITCH: duty_percent = sw  ? 100.0f : 0.0f;          break;
+            case COOL_SRC_OFF:    duty_percent = 0.0f;                         break;
+        }
         cooler_app_set_duty_percent(duty_percent);
 
         if (xTaskGetTickCount() - last_tx >= pdMS_TO_TICKS(1000)){

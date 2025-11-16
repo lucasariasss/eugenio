@@ -13,7 +13,7 @@
 
 #include "esp_log.h"
 
-#include "msg_app.h"   // udp_sock, slave_addr, last_temp, setpoint_c
+#include "msg_app.h"   // udp_sock, slave_addr, last_temp, g_setpoint
 
 #define TAG "console_app: "
 
@@ -57,15 +57,15 @@ void console_app_task(void *arg){
             }
             char out[32]; int len = snprintf(out, sizeof(out), "SET:%.2f\n", v);
             sendto(udp_sock, out, len, 0, (struct sockaddr*)&slave_addr, sizeof(slave_addr));
-            setpoint_c = v;
+            g_setpoint = v;
             ESP_LOGI(TAG, "Setpoint %.2f C enviado.", v);
         }
         else if (strncmp(line, "t", 1)==0)
         {
             if (!isnan(last_temp))
-                ESP_LOGI(TAG, "[Maestro] Temp actual: %.2f C (SP=%.2f)", last_temp, setpoint_c);
+                ESP_LOGI(TAG, "[Maestro] Temp actual: %.2f C (SP=%.2f)", last_temp, g_setpoint);
             else
-                ESP_LOGI(TAG, "[Maestro] Esperando TEMP... (SP=%.2f)", setpoint_c);
+                ESP_LOGI(TAG, "[Maestro] Esperando TEMP... (SP=%.2f)", g_setpoint);
         }
         else {
             ESP_LOGE(TAG, "Comando no reconocido.");

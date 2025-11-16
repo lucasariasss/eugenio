@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h> 
 #include <math.h>
+#include <ctype.h>
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -22,10 +23,15 @@ struct sockaddr_in slave_addr = {0};
 
 volatile bool master_known = false;
 volatile bool slave_known = false;
-SemaphoreHandle_t sock_mutex = NULL;
-float setpoint_c = 30.0f;
 volatile float last_temp = NAN;
 static TickType_t last_temp_tick = 0;
+
+volatile cool_src_t g_cool_src = COOL_SRC_TEMP;
+volatile led_src_t  g_led_src  = LED_SRC_PIR;
+volatile float      g_setpoint = 30.0f;
+volatile int        g_cmd_led  = 0;
+volatile int        g_sw       = 0;
+volatile int        g_pir      = 0;
 
 #define TAG "msg_app: "
 
@@ -47,9 +53,9 @@ void msg_app_open_slave(void) {
     inet_pton(AF_INET, MASTER_IP, &master_addr.sin_addr);
     master_known = true;
 
-    const char *hello = "HELLO\n";
-    sendto(udp_sock, hello, strlen(hello), 0, (struct sockaddr*)&master_addr, sizeof(master_addr));
-    ESP_LOGI(TAG, "HELLO enviado a maestro %s:%d", MASTER_IP, UDP_PORT);
+    const char *ping = "PING\n";
+    sendto(udp_sock, ping, strlen(ping), 0, (struct sockaddr*)&master_addr, sizeof(master_addr));
+    ESP_LOGI(TAG, "SLAVE enlazado UDP en *:%d, PING a %s:%d", UDP_PORT, MASTER_IP, UDP_PORT);
 }
 
 void msg_app_open_master(void){
@@ -71,53 +77,126 @@ void msg_app_open_master(void){
     memset(&slave_addr, 0, sizeof(slave_addr));
     slave_known = false;
 
-    ESP_LOGI(TAG, "UDP maestro escuchando en *:%d", UDP_PORT);
+    ESP_LOGI(TAG, "MASTER escuchando UDP en *:%d", UDP_PORT);
 }
+
+/**************** MAQUINAS DE ESTADO POR ROL ****************/
+#if MASTER == 1
+static void msg_app_handle_master(const char *buf, const struct sockaddr_in *src)
+{
+    slave_addr = *src;
+    slave_known = true;
+
+    if (!strncmp(buf, "PING", 4)) {
+        char ip[16]; inet_ntop(AF_INET, &src->sin_addr, ip, sizeof(ip));
+        ESP_LOGI(TAG, "PING desde esclavo %s", ip);
+        last_temp_tick = xTaskGetTickCount();
+    }
+    if (!strncmp(buf,"TEMP:",5)){
+        last_temp = atof(buf+5);
+        last_temp_tick = xTaskGetTickCount();
+    }
+}
+#endif // MASTER
+
+#if THERMAL == 1
+static void msg_app_handle_thermal(const char *buf, const struct sockaddr_in *src)
+{
+    if (!strncmp(buf,"CFG:COOLER_SRC=TEMP",19))   g_cool_src = COOL_SRC_TEMP;
+    else if (!strncmp(buf,"CFG:COOLER_SRC=PIR",18)) g_cool_src = COOL_SRC_PIR;
+    else if (!strncmp(buf,"CFG:COOLER_SRC=SWITCH",21)) g_cool_src = COOL_SRC_SWITCH;
+    else if (!strncmp(buf,"CFG:COOLER_SRC=OFF",18)) g_cool_src = COOL_SRC_OFF;
+
+    if (!strncmp(buf,"SET:",4)){
+        float v = atof(buf+4);
+        if (v>0 && v<120)
+        {
+            g_setpoint = v; 
+            ESP_LOGI(TAG,"Nuevo setpoint: %.2f C", g_setpoint); 
+        }
+    }
+
+    if (!strncmp(buf,"SW:",3)){
+        g_sw = atoi(buf+3);
+        if(g_sw == 0 || g_sw == 1)
+        {
+            ESP_LOGI(TAG,"Estado de switch: %d", g_sw);
+        }
+        else
+        {
+            g_sw = 0;
+            ESP_LOGE(TAG,"ingresa un valor valido del switch");
+        }
+    }
+
+    if (!strncmp(buf,"PIR:",4)){
+        int pir = atoi(buf+4);
+        if(pir == 0 || pir == 1)
+        {
+            ESP_LOGI(TAG,"Estado de PIR: %d", pir);
+        }
+        else
+        {
+            pir = 0;
+            ESP_LOGE(TAG,"ingresa un valor valido del pir");
+        }
+    }
+}
+#endif // THERMAL
+
+#if AUX == 1
+static void msg_app_handle_aux(const char *buf, const struct sockaddr_in *src)
+{
+    if (!strncmp(buf,"CFG:LED_SRC=PIR",15))          g_led_src = LED_SRC_PIR;
+    else if (!strncmp(buf,"CFG:LED_SRC=SWITCH",18))    g_led_src = LED_SRC_SWITCH;
+    else if (!strncmp(buf,"CFG:LED_SRC=CONSOLE",19))   g_led_src = LED_SRC_CONSOLE;
+
+    if (!strncmp(buf,"CMD:LED=",8))
+    {
+        int v = atoi(buf+8);
+        g_cmd_led = (v!=0);
+    }
+}
+#endif // AUX
 
 void msg_app_task_rx(void *arg){
     char buf[64];
-    struct sockaddr_in src; socklen_t slen=sizeof(src);
+    struct sockaddr_in src;
+    socklen_t slen=sizeof(src);
+
 #if MASTER == 1
-    const TickType_t hello_timeout = pdMS_TO_TICKS(1000); // si pasa 1s sin TEMP -> HELLO
+    const TickType_t ping_timeout = pdMS_TO_TICKS(1000); // si pasa 1s sin TEMP -> PING
     TickType_t now;
-#endif
+#endif // MASTER
+
     while (1){
         int n = recvfrom(udp_sock, buf, sizeof(buf)-1, 0, (struct sockaddr*)&src, &slen);
         if (n>0){
             buf[n]=0;
-#if THERMAL == 1
-            master_addr = src; master_known = true;
+            for(char *p=buf; *p; ++p) *p = toupper((unsigned char)*p);
 
-            if (strncmp(buf,"SET:",4)==0){
-                float v = atof(buf+4);
-                if (v>0 && v<120)
-                {
-                    setpoint_c = v; 
-                    ESP_LOGI(TAG,"Nuevo setpoint: %.2f C", setpoint_c); 
-                }
-            }
-#endif // THERMAL
 #if MASTER == 1
-            slave_addr = src; slave_known = true;
-
-            if (strncmp(buf, "HELLO", 5) == 0) {
-                char ip[16]; inet_ntop(AF_INET, &src.sin_addr, ip, sizeof(ip));
-                ESP_LOGI(TAG, "HELLO recibido desde esclavo %s", ip);
-                last_temp_tick = xTaskGetTickCount(); 
-                continue;
-            }
-            if (strncmp(buf,"TEMP:",5)==0){
-                last_temp = atof(buf+5);
-                last_temp_tick = xTaskGetTickCount();
-            }
-        } else {
-            now = xTaskGetTickCount();
-            bool stale = (last_temp_tick == 0) || ((now - last_temp_tick) > hello_timeout);
-            if (stale && slave_known){
-                static const char *hello = "HELLO\n";
-                sendto(udp_sock, hello, strlen(hello), 0, (struct sockaddr*)&slave_addr, sizeof(slave_addr));
-            }
+            msg_app_handle_master(buf, &src);
 #endif // MASTER
+
+#if THERMAL == 1
+            msg_app_handle_thermal(buf, &src);
+#endif // THERMAL
+
+#if AUX == 1
+            msg_app_handle_aux(buf, &src);
+#endif // AUX == 1
         }
+#if MASTER == 1
+        else {
+            now = xTaskGetTickCount();
+            bool stale = (last_temp_tick == 0) || ((now - last_temp_tick) > ping_timeout);
+            if (stale && slave_known){
+                static const char *ping = "PING\n";
+                sendto(udp_sock, ping, strlen(ping), 0, (struct sockaddr*)&slave_addr, sizeof(slave_addr));
+            }
+        }
+#endif // MASTER
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
