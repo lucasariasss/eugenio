@@ -6,16 +6,10 @@
 #include "esp_log.h"
 #include "esp_err.h"
 
+#define AUX_LED_GPIO  GPIO_NUM_25
+#define AUX_SW_GPIO   GPIO_NUM_26
+
 static const char *TAG = "aux_app";
-
-/* Configuración por defecto (ajustar según necesidades) */
-#ifndef AUX_APP_TASK_STACK_SIZE
-#define AUX_APP_TASK_STACK_SIZE 4096
-#endif
-
-#ifndef AUX_APP_TASK_PRIO
-#define AUX_APP_TASK_PRIO      (tskIDLE_PRIORITY + 5)
-#endif
 
 static TaskHandle_t s_aux_task_handle = NULL;
 
@@ -24,6 +18,24 @@ static TaskHandle_t s_aux_task_handle = NULL;
 esp_err_t aux_app_init(void)
 {
     ESP_LOGI(TAG, "Inicializando aplicación auxiliar");
+    ESP_LOGI(TAG, "Configurando LED en GPIO %d", AUX_LED_GPIO);
+    gpio_config_t io = {
+        .pin_bit_mask = 1ULL << AUX_LED_GPIO,
+        .mode = GPIO_MODE_OUTPUT, .pull_up_en = 0, .pull_down_en = 0,
+        .intr_type = GPIO_INTR_DISABLE
+    };
+    ESP_ERROR_CHECK(gpio_config(&io));
+    ESP_ERROR_CHECK(gpio_set_level(AUX_LED_GPIO, 0));
+
+    ESP_LOGI(TAG, "Configurando SW en GPIO %d", AUX_SW_GPIO);
+    gpio_config_t sw = {
+        .pin_bit_mask = 1ULL << AUX_SW_GPIO,
+        .mode = GPIO_MODE_INPUT,
+        .pull_up_en = 1, .pull_down_en = 0,
+        .intr_type = GPIO_INTR_DISABLE
+    };
+    ESP_ERROR_CHECK(gpio_config(&sw));
+
     return ESP_OK;
 }
 
@@ -32,25 +44,18 @@ int aux_app_read_pir(void)
     return g_pir;
 }
 
-int aux_app_read_sw(void) 
-{
-    return g_sw;
-}
-
 esp_err_t aux_app_set_led(int on)
 {
-    /* gpio_set_level(...) */ 
-    return ESP_OK;
+    return gpio_set_level(AUX_LED_GPIO, on ? 1 : 0);
 }
 
 /* Tarea principal de la aplicación auxiliar */
-// aux_app.c (task de ejemplo)
 void aux_app_poll_task(void *arg){
-  for(;;){
-    g_pir = aux_app_read_pir();
-    g_sw  = aux_app_read_sw();
-    vTaskDelay(pdMS_TO_TICKS(50));
-  }
+    for(;;){
+        g_pir = aux_app_read_pir();
+        g_sw  = gpio_get_level(AUX_SW_GPIO);
+        vTaskDelay(pdMS_TO_TICKS(50));
+    }
 }
 
 void aux_app_led_task(void *arg){

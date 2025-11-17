@@ -7,7 +7,6 @@
 
 esp_err_t aux_app_init(void);
 int aux_app_read_pir(void);
-int aux_app_read_sw(void);
 esp_err_t aux_app_set_led(int on);
 
 void aux_app_led_task(void *arg);
