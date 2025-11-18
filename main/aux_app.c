@@ -8,6 +8,7 @@
 
 #define AUX_LED_GPIO  GPIO_NUM_25
 #define AUX_SW_GPIO   GPIO_NUM_26
+#define AUX_PIR_GPIO  GPIO_NUM_34
 
 static const char *TAG = "aux_app";
 
@@ -36,12 +37,22 @@ esp_err_t aux_app_init(void)
     };
     ESP_ERROR_CHECK(gpio_config(&sw));
 
+    ESP_LOGI(TAG, "Configurando PIR en GPIO %d", AUX_PIR_GPIO);
+    gpio_config_t io = {
+        .pin_bit_mask = 1ULL << AUX_PIR_GPIO,
+        .mode = GPIO_MODE_INPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE
+    };
+gpio_config(&io);
+
     return ESP_OK;
 }
 
 int aux_app_read_pir(void)
 {
-    return g_pir;
+    return gpio_get_level(AUX_PIR_GPIO);
 }
 
 esp_err_t aux_app_set_led(int on)
