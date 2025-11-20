@@ -5,7 +5,8 @@
     --bgImagen: #eeeeee;
     --headerAndFooter: #002e5f;
     --paddingH: 5vw;
-    --imageFullSize: 66.66vw
+    --imageFullSize: 66.66vw;
+    --circleSize: 3.5vw;
 }
 
 body {
@@ -92,12 +93,45 @@ h4 {
     }        
 }
 
-.image img{        
+.image-inner {
+    position: relative;
+    width: 90%;
+    margin: 0 auto;      /* centrado dentro de .image */
+}
+
+.image-inner img{        
     display:block;
     margin-left:auto;
     margin-right:auto;
-    width: 90%;
+    width: 100%;
 }
+
+.circulo {
+    position: absolute;
+    width: var(--circleSize);
+    height: var(--circleSize);
+    border-radius: 50%;
+    background-color: rgba(0, 46, 95, 0.4); /* rojo semi-transparente */
+    opacity: 0;
+}
+
+.circulo-activo {opacity: 1;}
+
+#c1  {top: 20%;     left: 14%;   }
+#c2  {top: 25%;     left: 22.5%; }
+#c3  {top: 37%;     left: 19%;   }
+#c4  {top: 45%;     left: 27.5%; }
+#c5  {top: 60%;     left: 10%;   }
+#c6  {top: 27.5%;   left: 5%;    }
+#c7  {top: 60%;     left: 28%;   }
+#c8  {top: 27.5%;   left: 32.5%; }
+#c9  {top: 75%;     left: 12.5%; } /*13 izquierdo*/
+#c10 {top: 75%;     left: 26%;   } /*13 derecho*/
+#c11 {top: 7%;      left: 12.5%; } /*17 cuello*/
+#c12 {top: 20%;     left: 57.5%; } /*8 espalda*/
+#c13 {top: 20%;     left: 88%;   } /*6 espalda*/
+#c14 {top: 60%;     left: 65%;   } /*7 espalda*/
+#c15 {top: 60%;     left: 82.5%; } /*5 espalda*/
 
 /*WIFI*/
 .gr{

@@ -2,6 +2,34 @@
 var wifiConnectInterval = null;
 var configuracion_boton = 0
 
+const mapaDeEnfermedades = {
+	"000": ["c1", "c2", "c3", "c4"],
+	"001": ["c1", "c2", "c3", "c4"],
+	"002": ["c4"],
+	"003": ["c4"],
+	"004": ["c1"],
+	"005": ["c1"],
+	"006": ["c1"],
+	"007": ["c3"],
+	"008": ["c3"],
+	"009": ["c1"],
+	"010": ["c1", "c2", "c3", "c4"],
+	"011": ["c3"],
+	"012": ["c3"],
+	"013": ["c3", "c4"],
+	"014": ["c3", "c4"],
+	"015": ["c4"],
+	"016": ["c4"],
+	"017": ["c4"],
+	"018": ["c4"],
+	"019": ["c3", "c4"],
+	"020": ["c1", "c2"],
+	"021": ["c2"],
+	"022": ["c2"],
+	"023": ["c1", "c2"],
+	"024": ["c4"]
+};
+
 /* 2. FUNCIONES DE INICIALIZACION.*/
 $(document).ready(function(){
 	// Solo pido info de WiFi si la página tiene la UI de WiFi
@@ -37,7 +65,7 @@ $(document).ready(function(){
 /* 3.0. FUNCIONES EN EL HEADER*/
 
 /*
- * 3.0.1. Swicthea entre menu de configuracion es y menu de simulacion
+ * 3.0.1. Swicthea entre menu de configuraciones y menu de simulacion
  */
 function switchConfig()
 {	
@@ -60,7 +88,7 @@ function switchConfig()
  * 4.0.1. Manda la opcion seleccionada a la STM32
  */
 function send_uart(){
-	const selectedDisease = parseInt($('#selectedDis').val()) + 1;
+	const selectedDisease = parseInt($('#selectedDis').val());
 	const data = JSON.stringify({ enfermedad: selectedDisease, timestamp: Date.now() });
 
 	$.ajax({
@@ -73,7 +101,23 @@ function send_uart(){
 	});
 }
 
-/* 5.0. FUNCIONES EN EL MENU DE CONECCION*/
+/* 
+ * 4.0.2. Muestra los circulos correspondientes a la enfermedad seleccionada
+*/
+function showCircles(){
+	const selectedDisease = $('#selectedDis').val();
+	expuestos = document.getElementsByClassName('circulo-activo');
+	const mostrarCirculos = mapaDeEnfermedades[selectedDisease];
+	while (expuestos.length > 0){
+		expuestos[0].classList.remove('circulo-activo');
+	}
+	for (let i=0; i<mostrarCirculos.length; i++){
+		document.getElementById(mostrarCirculos[i]).classList.add('circulo-activo');
+	}
+}
+
+
+/* 5.0. FUNCIONES EN EL MENU DE CONEXION*/
 
 /*
  * 5.0.1. Gets the ESP32's access point SSID for displaying on the web page.
@@ -85,7 +129,7 @@ function getSSID()
 	});
 }
 
-/* 5.1. CONECCION*/
+/* 5.1. CONEXION*/
 
 /*
  * 5.1.1. Checkea que las credenciales esten bien
