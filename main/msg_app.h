@@ -38,7 +38,7 @@ extern volatile int        g_cmd_led;   // 0/1 solo si LED_SRC_CONSOLE
 extern volatile int        g_sw;        // 0/1 (estado último recibido o leído)
 extern volatile int        g_pir;       // 0/1 (estado último leído)
 
-
+int msg_app_tx_to_slave(const char *s);
 void msg_app_open_slave(void);
 void msg_app_open_master(void);
 void msg_app_task_rx(void *arg);

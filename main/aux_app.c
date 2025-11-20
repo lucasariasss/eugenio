@@ -20,12 +20,12 @@ esp_err_t aux_app_init(void)
 {
     ESP_LOGI(TAG, "Inicializando aplicación auxiliar");
     ESP_LOGI(TAG, "Configurando LED en GPIO %d", AUX_LED_GPIO);
-    gpio_config_t io = {
+    gpio_config_t led = {
         .pin_bit_mask = 1ULL << AUX_LED_GPIO,
         .mode = GPIO_MODE_OUTPUT, .pull_up_en = 0, .pull_down_en = 0,
         .intr_type = GPIO_INTR_DISABLE
     };
-    ESP_ERROR_CHECK(gpio_config(&io));
+    ESP_ERROR_CHECK(gpio_config(&led));
     ESP_ERROR_CHECK(gpio_set_level(AUX_LED_GPIO, 0));
 
     ESP_LOGI(TAG, "Configurando SW en GPIO %d", AUX_SW_GPIO);
@@ -38,14 +38,14 @@ esp_err_t aux_app_init(void)
     ESP_ERROR_CHECK(gpio_config(&sw));
 
     ESP_LOGI(TAG, "Configurando PIR en GPIO %d", AUX_PIR_GPIO);
-    gpio_config_t io = {
+    gpio_config_t pir = {
         .pin_bit_mask = 1ULL << AUX_PIR_GPIO,
         .mode = GPIO_MODE_INPUT,
         .pull_up_en = GPIO_PULLUP_DISABLE,
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .intr_type = GPIO_INTR_DISABLE
     };
-gpio_config(&io);
+    gpio_config(&pir);
 
     return ESP_OK;
 }

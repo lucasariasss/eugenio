@@ -43,30 +43,34 @@ void console_app_task(void *arg){
         trim(line);
         if (!*line) continue;
 
-        if (strncmp(line, "set", 3)==0){
-            const char *argp = line+3;
-            while (isspace((unsigned char)*argp)) argp++;
-            int ok=0; float v = parse_float(argp, &ok);
-            if (!ok || !(v>0 && v<120)){
-                ESP_LOGE(TAG, "Error: valor inválido. Rango: 0<SP<120");
-                continue;
+        if (!strncmp(line, "set ", 4)) {
+            int ok = 0;
+            float sp = parse_float(line+4, &ok);
+            if (!ok) { ESP_LOGE(TAG, "SET inválido"); continue; }
+            char out[32];
+            int len = snprintf(out, sizeof(out), "SET:%.2f\n", sp);
+            if(len > 0)
+            {
+                if (msg_app_tx_to_slave(out) < 0) ESP_LOGE("CLI","No hay slave conectado");
             }
-            if (!slave_known) {
-                ESP_LOGE(TAG, "No hay esclavo conectado.");
-                continue;
-            }
-            char out[32]; int len = snprintf(out, sizeof(out), "SET:%.2f\n", v);
-            sendto(udp_sock, out, len, 0, (struct sockaddr*)&slave_addr, sizeof(slave_addr));
-            g_setpoint = v;
-            ESP_LOGI(TAG, "Setpoint %.2f C enviado.", v);
+            continue;
         }
-        else if (strncmp(line, "t", 1)==0)
-        {
-            if (!isnan(last_temp))
-                ESP_LOGI(TAG, "[Maestro] Temp actual: %.2f C (SP=%.2f)", last_temp, g_setpoint);
-            else
-                ESP_LOGI(TAG, "[Maestro] Esperando TEMP... (SP=%.2f)", g_setpoint);
+        else if (!strncmp(line, "cfg cooler ", 11)) {
+            char *m = line + 11;
+            for (char *p=m; *p; ++p) *p = (char)tolower((unsigned char)*p);
+            if (!strncmp(m,"temp",4)   && m[4]=='\0') msg_app_tx_to_slave("CFG:COOLER_SRC=TEMP\n");
+            else if (!strncmp(m,"pir",3)    && m[3]=='\0') msg_app_tx_to_slave("CFG:COOLER_SRC=PIR\n");
+            else if (!strncmp(m,"switch",6) && m[6]=='\0') msg_app_tx_to_slave("CFG:COOLER_SRC=SWITCH\n");
+            else if (!strncmp(m,"off",3)    && m[3]=='\0') msg_app_tx_to_slave("CFG:COOLER_SRC=OFF\n");
+            else ESP_LOGE(TAG, "Uso: cfg cooler {temp|pir|switch|off}");
+            continue;
         }
+        else if (strcmp(line, "t") == 0) {
+        if (!isnan(last_temp))
+            ESP_LOGI(TAG, "[Maestro] Temp actual: %.2f C (SP=%.2f)", last_temp, g_setpoint);
+        else
+            ESP_LOGI(TAG, "[Maestro] Esperando TEMP... (SP=%.2f)", g_setpoint);
+}
         else {
             ESP_LOGE(TAG, "Comando no reconocido.");
         }

@@ -35,6 +35,12 @@ volatile int        g_pir      = 0;
 
 #define TAG "msg_app: "
 
+int msg_app_tx_to_slave(const char *s) {
+  if (!slave_known) return -1;
+  int len = strlen(s);
+  return sendto(udp_sock, s, len, 0, (struct sockaddr*)&slave_addr, sizeof(slave_addr));
+}
+
 void msg_app_open_slave(void) {
     udp_sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
     if (udp_sock < 0) { ESP_LOGE(TAG, "socket failed"); vTaskDelay(portMAX_DELAY); }
@@ -92,7 +98,7 @@ static void msg_app_handle_master(const char *buf, const struct sockaddr_in *src
         ESP_LOGI(TAG, "PING desde esclavo %s", ip);
         last_temp_tick = xTaskGetTickCount();
     }
-    if (!strncmp(buf,"TEMP:",5)){
+    if (!strncmp(buf, "TEMP:", 5)) {
         last_temp = atof(buf+5);
         last_temp_tick = xTaskGetTickCount();
     }
