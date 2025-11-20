@@ -6,11 +6,9 @@ idf_component_register(
     INCLUDE_DIRS        "."			 # optional, add here public include directories
     EMBED_FILES
         "webpage/index.html"
+        "webpage/index_sta.html"
         "webpage/app.css"
         "webpage/app.js"
-        "webpage/index_sta.html"
-        "webpage/app_sta.css"
-        "webpage/app_sta.js"
         "webpage/favicon.ico"
         "webpage/jquery-3.3.1.min.js"
         "webpage/logo.png"

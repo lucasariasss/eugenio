@@ -18,17 +18,9 @@
 #if HAS_STA_MODE == 0
 #define INDEX_START "_binary_index_html_start"
 #define INDEX_END   "_binary_index_html_end"
-#define CSS_START   "_binary_app_css_start"
-#define CSS_END     "_binary_app_css_end"
-#define JS_START    "_binary_app_js_start"
-#define JS_END      "_binary_app_js_end"
 #elif HAS_STA_MODE == 1
 #define INDEX_START "_binary_index_sta_html_start"
 #define INDEX_END   "_binary_index_sta_html_end"
-#define CSS_START   "_binary_app_sta_css_start"
-#define CSS_END     "_binary_app_sta_css_end"
-#define JS_START    "_binary_app_sta_js_start"
-#define JS_END      "_binary_app_sta_js_end"
 #else
 #error "HAS_STA_MODE debe ser 0 (AP) o 1 (STA)"
 #endif

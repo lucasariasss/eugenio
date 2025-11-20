@@ -99,6 +99,54 @@ h4 {
     width: 90%;
 }
 
+/*WIFI*/
+.gr{
+	color: green;
+}
+.rd{
+	color: red;
+}
+
+#ap_ssid_label, #ap_ssid {
+	display:inline;
+}
+
+#ap_ssid {
+	color: #1d3557;
+}
+
+#connected_ap_label, #connected_ap {
+    display: inline;
+}
+
+#ip_address_label, #netmask_label, #gateway_label {
+    display: inline;
+}
+
+#wifi_connect_ip, #wifi_connect_netmask, #wifi_connect_gw {
+    display: inline;
+}
+
+#connected_ap {
+	color: #1d3557;
+}
+
+#wifi_connect_ip {
+	color: #1d3557;
+}
+
+#wifi_connect_netmask {
+	color: #1d3557;
+}
+
+#wifi_connect_gw {
+	color: #1d3557;
+}
+
+#disconnect_wifi {
+    display: none;
+}
+
 /*INPUTS*/
 
 .buttons {
@@ -129,6 +177,18 @@ input[type="button"]:hover {
 input[type="button"]:active {
     box-shadow: inset -2px -2px 3px rgba(255, 255, 255, .6),
                 inset 2px 2px 3px rgba(0, 0, 0, .6);
+}
+
+input[type="text"], input[type="password"]{
+    border-width: 0.1px;
+    border-radius: 10px;
+    height: 45px;
+}
+
+input[type="checkbox"]{
+    position: relative;
+    margin-left: -25px;
+    width: 15px;
 }
 
 #execute_simulation{
