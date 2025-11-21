@@ -65,12 +65,28 @@ void console_app_task(void *arg){
             else ESP_LOGE(TAG, "Uso: cfg cooler {temp|pir|switch|off}");
             continue;
         }
+        else if (!strncmp(line, "cfg led ", 8)) {
+            char *m = line + 8;
+            for (char *p=m; *p; ++p) *p = (char)tolower((unsigned char)*p);
+            if      (!strncmp(m,"pir",3)    && m[3]=='\0') msg_app_tx_to_slave("CFG:LED_SRC=PIR\n");
+            else if (!strncmp(m,"switch",6) && m[6]=='\0') msg_app_tx_to_slave("CFG:LED_SRC=SWITCH\n");
+            else if (!strncmp(m,"console",7)&& m[7]=='\0') msg_app_tx_to_slave("CFG:LED_SRC=CONSOLE\n");
+            else ESP_LOGE(TAG, "Uso: cfg led {pir|switch|console}");
+            continue;
+        }
+        else if (!strncmp(line, "led ", 4)) {
+            const char *v = line + 4;
+            if      (!strncmp(v,"0",1) && v[1]=='\0') msg_app_tx_to_slave("CMD:LED=0\n");
+            else if (!strncmp(v,"1",1) && v[1]=='\0') msg_app_tx_to_slave("CMD:LED=1\n");
+            else ESP_LOGE(TAG, "Uso: led {0|1}");
+            continue;
+        }
         else if (strcmp(line, "t") == 0) {
         if (!isnan(last_temp))
             ESP_LOGI(TAG, "[Maestro] Temp actual: %.2f C (SP=%.2f)", last_temp, g_setpoint);
         else
             ESP_LOGI(TAG, "[Maestro] Esperando TEMP... (SP=%.2f)", g_setpoint);
-}
+        }
         else {
             ESP_LOGE(TAG, "Comando no reconocido.");
         }
