@@ -26,11 +26,13 @@ typedef enum
 
 extern int udp_sock;
 extern struct sockaddr_in master_addr;
-extern struct sockaddr_in slave_addr;
+extern struct sockaddr_in slave_addr_thermal;
+extern struct sockaddr_in slave_addr_aux;
 
-extern volatile bool master_known;
-extern volatile bool slave_known;
-extern volatile float last_temp;
+extern volatile bool       master_known;
+extern volatile bool       thermal_known;
+extern volatile bool       aux_known;
+extern volatile float      last_temp;
 extern volatile cool_src_t g_cool_src;
 extern volatile led_src_t  g_led_src;
 extern volatile float      g_setpoint;
@@ -38,7 +40,9 @@ extern volatile int        g_cmd_led;   // 0/1 solo si LED_SRC_CONSOLE
 extern volatile int        g_sw;        // 0/1 (estado último recibido o leído)
 extern volatile int        g_pir;       // 0/1 (estado último leído)
 
-int msg_app_tx_to_slave(const char *s);
+// + helpers de TX específicos
+int msg_app_tx_to_thermal(const char *s);
+int msg_app_tx_to_aux(const char *s);
 void msg_app_open_slave(void);
 void msg_app_open_master(void);
 void msg_app_task_rx(void *arg);

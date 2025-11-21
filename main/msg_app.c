@@ -19,10 +19,12 @@
 
 int udp_sock = -1;
 struct sockaddr_in master_addr = {0};
-struct sockaddr_in slave_addr = {0};
+struct sockaddr_in slave_addr_thermal = {0};
+struct sockaddr_in slave_addr_aux     = {0};
 
 volatile bool master_known = false;
-volatile bool slave_known = false;
+volatile bool thermal_known = false;
+volatile bool aux_known     = false;
 volatile float last_temp = NAN;
 static TickType_t last_temp_tick = 0;
 
@@ -35,10 +37,14 @@ volatile int        g_pir      = 0;
 
 #define TAG "msg_app: "
 
-int msg_app_tx_to_slave(const char *s) {
-  if (!slave_known) return -1;
-  int len = strlen(s);
-  return sendto(udp_sock, s, len, 0, (struct sockaddr*)&slave_addr, sizeof(slave_addr));
+int msg_app_tx_to_thermal(const char *s){
+    if (!thermal_known) return -1;
+    return sendto(udp_sock, s, strlen(s), 0, (struct sockaddr*)&slave_addr_thermal, sizeof(slave_addr_thermal));
+}
+
+int msg_app_tx_to_aux(const char *s){
+    if (!aux_known) return -1;
+    return sendto(udp_sock, s, strlen(s), 0, (struct sockaddr*)&slave_addr_aux, sizeof(slave_addr_aux));
 }
 
 void msg_app_open_slave(void) {
@@ -59,7 +65,13 @@ void msg_app_open_slave(void) {
     inet_pton(AF_INET, MASTER_IP, &master_addr.sin_addr);
     master_known = true;
 
-    const char *ping = "PING\n";
+    #if THERMAL == 1
+        const char *ping = "PING:THERMAL\n";
+    #elif AUX == 1
+        const char *ping = "PING:AUX\n";
+    #else
+        const char *ping = "PING\n";
+    #endif
     sendto(udp_sock, ping, strlen(ping), 0, (struct sockaddr*)&master_addr, sizeof(master_addr));
     ESP_LOGI(TAG, "SLAVE enlazado UDP en *:%d, PING a %s:%d", UDP_PORT, MASTER_IP, UDP_PORT);
 }
@@ -74,35 +86,47 @@ void msg_app_open_master(void){
 
     struct sockaddr_in listen_addr = {0};
     listen_addr.sin_family = AF_INET;
-    listen_addr.sin_port = htons(UDP_PORT);
+    listen_addr.sin_port   = htons(UDP_PORT);
     listen_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     if (bind(udp_sock, (struct sockaddr*)&listen_addr, sizeof(listen_addr)) < 0) {
         ESP_LOGE(TAG, "bind failed");
         vTaskDelay(portMAX_DELAY);
     }
-    memset(&slave_addr, 0, sizeof(slave_addr));
-    slave_known = false;
+
+    memset(&slave_addr_thermal, 0, sizeof(slave_addr_thermal));
+    memset(&slave_addr_aux,     0, sizeof(slave_addr_aux));
+    thermal_known = false;
+    aux_known     = false;
 
     ESP_LOGI(TAG, "MASTER escuchando UDP en *:%d", UDP_PORT);
 }
+
 
 /**************** MAQUINAS DE ESTADO POR ROL ****************/
 #if MASTER == 1
 static void msg_app_handle_master(const char *buf, const struct sockaddr_in *src)
 {
-    slave_addr = *src;
-    slave_known = true;
-
-    if (!strncmp(buf, "PING", 4)) {
-        char ip[16]; inet_ntop(AF_INET, &src->sin_addr, ip, sizeof(ip));
-        ESP_LOGI(TAG, "PING desde esclavo %s", ip);
-        last_temp_tick = xTaskGetTickCount();
-    }
-    if (!strncmp(buf, "TEMP:", 5)) {
+    if (!strncmp(buf,"TEMP:",5)){
         last_temp = atof(buf+5);
+        slave_addr_thermal = *src; thermal_known = true;
         last_temp_tick = xTaskGetTickCount();
+        return;
+    }
+    if (!strncmp(buf,"PING:THERMAL",12)){
+        slave_addr_thermal = *src; thermal_known = true;
+        last_temp_tick = xTaskGetTickCount();
+        return;
+    }
+    if (!strncmp(buf,"PING:AUX",8)){
+        slave_addr_aux = *src; aux_known = true;
+        return;
+    }
+    if (!strncmp(buf,"PING",4)){
+        last_temp_tick = xTaskGetTickCount();
+        return;
     }
 }
+
 #endif // MASTER
 
 #if THERMAL == 1
@@ -197,9 +221,9 @@ void msg_app_task_rx(void *arg){
         else {
             now = xTaskGetTickCount();
             bool stale = (last_temp_tick == 0) || ((now - last_temp_tick) > ping_timeout);
-            if (stale && slave_known){
-                static const char *ping = "PING\n";
-                sendto(udp_sock, ping, strlen(ping), 0, (struct sockaddr*)&slave_addr, sizeof(slave_addr));
+            if (stale){
+                if (thermal_known) sendto(udp_sock,"PING:MASTER\n",12,0, (struct sockaddr*)&slave_addr_thermal,sizeof(slave_addr_thermal));
+                if (aux_known) sendto(udp_sock,"PING:MASTER\n",12,0, (struct sockaddr*)&slave_addr_aux,sizeof(slave_addr_aux));
             }
         }
 #endif // MASTER
