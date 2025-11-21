@@ -6,7 +6,12 @@
     --headerAndFooter: #002e5f;
     --paddingH: 5vw;
     --imageFullSize: 66.66vw;
-    --circleSize: 3.5vw;
+    --circleSize: 6vw;
+}
+@media (width >= 480px) {
+    :root {
+        --circleSize: 3.5vw;
+    }
 }
 
 body {
