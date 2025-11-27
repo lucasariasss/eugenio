@@ -94,14 +94,14 @@ void console_app_task(void *arg){
 }
 /*
 LISTA DE COMANDOS:
-set <float>            ; setear nuevo setpoint de temperatura
-cfg led pir            ; configurar fuente de LED en AUX como PIR
-cfg led switch         ; configurar fuente de LED en AUX como SWITCH
-cfg led console        ; configurar fuente de LED en AUX como CONSOLE
-cfg cooler temp        ; configurar fuente de control de cooler en THERMAL como LM35
-cfg cooler pir         ; configurar fuente de control de cooler en THERMAL como PIR
-cfg cooler switch      ; configurar fuente de control de cooler en THERMAL como SWITCH
-cfg cooler off         ; apagar cooler
-led 0                  ; apagar LED desde consola
-led 1                  ; encender LED desde consola
+set <float>
+cfg led pir            
+cfg led switch
+cfg led console
+cfg cooler temp
+cfg cooler pir        
+cfg cooler switch
+cfg cooler off         
+led 0
+led 1
 */
