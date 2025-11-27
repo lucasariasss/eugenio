@@ -38,11 +38,13 @@ volatile int        g_pir      = 0;
 #define TAG "msg_app: "
 
 int msg_app_tx_to_thermal(const char *s){
+    ESP_LOGI(TAG, "TX to THERMAL: %s", s);
     if (!thermal_known) return -1;
     return sendto(udp_sock, s, strlen(s), 0, (struct sockaddr*)&slave_addr_thermal, sizeof(slave_addr_thermal));
 }
 
 int msg_app_tx_to_aux(const char *s){
+    ESP_LOGI(TAG, "TX to AUX: %s", s);
     if (!aux_known) return -1;
     return sendto(udp_sock, s, strlen(s), 0, (struct sockaddr*)&slave_addr_aux, sizeof(slave_addr_aux));
 }
@@ -132,10 +134,10 @@ static void msg_app_handle_master(const char *buf, const struct sockaddr_in *src
 #if THERMAL == 1
 static void msg_app_handle_thermal(const char *buf, const struct sockaddr_in *src)
 {
-    if (!strncmp(buf,"CFG:COOLER_SRC=TEMP",19))   g_cool_src = COOL_SRC_TEMP;
-    else if (!strncmp(buf,"CFG:COOLER_SRC=PIR",18)) g_cool_src = COOL_SRC_PIR;
-    else if (!strncmp(buf,"CFG:COOLER_SRC=SWITCH",21)) g_cool_src = COOL_SRC_SWITCH;
-    else if (!strncmp(buf,"CFG:COOLER_SRC=OFF",18)) g_cool_src = COOL_SRC_OFF;
+    if (!strncmp(buf,"CFG:COOLER_SRC=TEMP",19))        {ESP_LOGI(TAG, "COOLER_SRC_TEMP");   g_cool_src = COOL_SRC_TEMP; }
+    else if (!strncmp(buf,"CFG:COOLER_SRC=PIR",18))    {ESP_LOGI(TAG, "COOLER_SRC_PIR");    g_cool_src = COOL_SRC_PIR;  }
+    else if (!strncmp(buf,"CFG:COOLER_SRC=SWITCH",21)) {ESP_LOGI(TAG, "COOLER_SRC_SWITCH"); g_cool_src = COOL_SRC_SWITCH;}
+    else if (!strncmp(buf,"CFG:COOLER_SRC=OFF",18))    {ESP_LOGI(TAG, "COOLER_SRC_OFF");    g_cool_src = COOL_SRC_OFF;  }
 
     if (!strncmp(buf,"SET:",4)){
         float v = atof(buf+4);
@@ -177,14 +179,15 @@ static void msg_app_handle_thermal(const char *buf, const struct sockaddr_in *sr
 #if AUX == 1
 static void msg_app_handle_aux(const char *buf, const struct sockaddr_in *src)
 {
-    if (!strncmp(buf,"CFG:LED_SRC=PIR",15))          g_led_src = LED_SRC_PIR;
-    else if (!strncmp(buf,"CFG:LED_SRC=SWITCH",18))    g_led_src = LED_SRC_SWITCH;
-    else if (!strncmp(buf,"CFG:LED_SRC=CONSOLE",19))   g_led_src = LED_SRC_CONSOLE;
+    if (!strncmp(buf,"CFG:LED_SRC=PIR",15))            {ESP_LOGI(TAG, "LED_SRC_PIR");    g_led_src = LED_SRC_PIR;}
+    else if (!strncmp(buf,"CFG:LED_SRC=SWITCH",18))    {ESP_LOGI(TAG, "LED_SRC_SWITCH"); g_led_src = LED_SRC_SWITCH;}
+    else if (!strncmp(buf,"CFG:LED_SRC=CONSOLE",19))   {ESP_LOGI(TAG, "LED_SRC_CONSOLE");g_led_src = LED_SRC_CONSOLE;}
 
     if (!strncmp(buf,"CMD:LED=",8))
     {
         int v = atoi(buf+8);
         g_cmd_led = (v!=0);
+        ESP_LOGI(TAG, "CMD_LED=%d", g_cmd_led);
     }
 }
 #endif // AUX

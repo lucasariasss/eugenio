@@ -27,7 +27,7 @@ static void wifi_app_stack_init(void) {
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 #if MASTER == 1
     esp_netif_create_default_wifi_ap();
-#elif THERMAL == 1
+#elif SLAVE == 1
     esp_netif_create_default_wifi_sta();
 #endif
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();

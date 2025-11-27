@@ -82,13 +82,20 @@ void console_app_task(void *arg){
             continue;
         }
         else if (strcmp(line, "t") == 0) {
-        if (!isnan(last_temp))
-            ESP_LOGI(TAG, "[Maestro] Temp actual: %.2f C (SP=%.2f)", last_temp, g_setpoint);
-        else
-            ESP_LOGI(TAG, "[Maestro] Esperando TEMP... (SP=%.2f)", g_setpoint);
+            if (!isnan(last_temp))
+                ESP_LOGI(TAG, "[Maestro] Temp actual: %.2f C (SP=%.2f)", last_temp, g_setpoint);
+            else
+                ESP_LOGI(TAG, "[Maestro] Esperando TEMP... (SP=%.2f)", g_setpoint);
         }
         else {
-            ESP_LOGE(TAG, "Comando no reconocido.");
+            ESP_LOGE(TAG, "Comando no reconocido. (%s)", line);
         }
     }
 }
+/*
+cfg led console
+cfg led switch
+cfg led pir
+led 1
+led 0
+*/

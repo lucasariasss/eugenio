@@ -13,7 +13,7 @@
 
 void cooler_app_pwm_init(void);
 
-void cooler_app_set_pct(float pct);
+void cooler_app_set_duty_percent(float duty_percent);
 
 float cooler_app_curve(float t, float sp);
 

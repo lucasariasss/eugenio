@@ -31,13 +31,13 @@
 
 void app_main(void){
     ESP_ERROR_CHECK(nvs_flash_init());
-    ESP_LOGE(TAG, "App iniciada");
+    ESP_LOGI(TAG, "App iniciada");
 
 #if MASTER == 1
     wifi_app_init_softap();
     msg_app_open_master();
 
-    xTaskCreate(console_app_task,  "console",  4*1024, NULL, 5, NULL);
+    xTaskCreate(console_app_task,  "console",  4*1024, NULL, 4, NULL);
 #endif // MASTER
 
 #if SLAVE == 1
@@ -48,7 +48,7 @@ void app_main(void){
 #if THERMAL == 1
     lm35_app_init();
     cooler_app_pwm_init();
-    xTaskCreate(cooler_app_task_sense_ctrl_tx, "sense_tx", 3*1024, NULL, 5, NULL);
+    xTaskCreate(cooler_app_task_sense_ctrl_tx, "sense_tx", 3*1024, NULL, 4, NULL);
 #endif // THERMAL
 
 #if AUX == 1
@@ -57,5 +57,5 @@ void app_main(void){
     xTaskCreate(aux_app_led_task, "aux_app_led_task", 2048, NULL, 4, NULL);
 #endif
 
-    xTaskCreate(msg_app_task_rx, "udp_rx", 3*1024, NULL, 6, NULL);
+    xTaskCreate(msg_app_task_rx, "udp_rx", 3*1024, NULL, 4, NULL);
 }

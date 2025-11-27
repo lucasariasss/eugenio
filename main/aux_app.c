@@ -45,7 +45,7 @@ esp_err_t aux_app_init(void)
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .intr_type = GPIO_INTR_DISABLE
     };
-    gpio_config(&pir);
+    ESP_ERROR_CHECK(gpio_config(&pir));
 
     return ESP_OK;
 }
@@ -60,11 +60,15 @@ esp_err_t aux_app_set_led(int on)
     return gpio_set_level(AUX_LED_GPIO, on ? 1 : 0);
 }
 
-/* Tarea principal de la aplicación auxiliar */
 void aux_app_poll_task(void *arg){
     for(;;){
-        g_pir = aux_app_read_pir();
-        g_sw  = gpio_get_level(AUX_SW_GPIO);
+        int pir = aux_app_read_pir();          // 1) leo una sola vez
+        if (g_pir != pir)
+        {
+            g_pir = pir;                       // 2) actualizo
+            ESP_LOGI(TAG, "Estado de PIR: %d", g_pir);
+        }
+        g_sw  = !gpio_get_level(AUX_SW_GPIO);
         vTaskDelay(pdMS_TO_TICKS(50));
     }
 }
@@ -74,7 +78,7 @@ void aux_app_led_task(void *arg){
         int led_on = 0;
         switch (g_led_src) {
             case LED_SRC_PIR:     led_on = g_pir;          break;
-            case LED_SRC_SWITCH:  led_on = g_sw;           break;
+            case LED_SRC_SWITCH:  led_on = g_sw;          break;
             case LED_SRC_CONSOLE: led_on = g_cmd_led;      break;
         }
         aux_app_set_led(led_on);
