@@ -52,6 +52,7 @@ void console_app_task(void *arg){
             if(len > 0)
             {
                 if (msg_app_tx_to_thermal(out) < 0) ESP_LOGE(TAG,"Thermal no conocido");
+                else g_setpoint = sp;
             }
             continue;
         }
@@ -95,6 +96,8 @@ void console_app_task(void *arg){
 /*
 LISTA DE COMANDOS:
 set <float>
+set 25.5
+set 40,0
 cfg led pir            
 cfg led switch
 cfg led console
