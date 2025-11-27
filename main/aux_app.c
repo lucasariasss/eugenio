@@ -62,13 +62,24 @@ esp_err_t aux_app_set_led(int on)
 
 void aux_app_poll_task(void *arg){
     for(;;){
-        int pir = aux_app_read_pir();          // 1) leo una sola vez
+        int pir = aux_app_read_pir();
+        char line[32];
         if (g_pir != pir)
         {
-            g_pir = pir;                       // 2) actualizo
+            g_pir = pir;
             ESP_LOGI(TAG, "Estado de PIR: %d", g_pir);
+            int len = snprintf(line, sizeof(line), "PIR:%d\n", pir);
+            if (len > 0) msg_app_tx_to_master(line);
         }
-        g_sw  = !gpio_get_level(AUX_SW_GPIO);
+        
+        int sw  = !gpio_get_level(AUX_SW_GPIO);
+        if (g_sw != sw)
+        {
+            g_sw = sw;
+            ESP_LOGI(TAG, "Estado de switch: %d", g_sw);
+            int len = snprintf(line, sizeof(line), "SW:%d\n", sw);
+            if (len > 0) msg_app_tx_to_master(line);
+        }
         vTaskDelay(pdMS_TO_TICKS(50));
     }
 }
@@ -78,7 +89,7 @@ void aux_app_led_task(void *arg){
         int led_on = 0;
         switch (g_led_src) {
             case LED_SRC_PIR:     led_on = g_pir;          break;
-            case LED_SRC_SWITCH:  led_on = g_sw;          break;
+            case LED_SRC_SWITCH:  led_on = g_sw;           break;
             case LED_SRC_CONSOLE: led_on = g_cmd_led;      break;
         }
         aux_app_set_led(led_on);

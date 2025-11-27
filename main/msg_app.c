@@ -49,6 +49,12 @@ int msg_app_tx_to_aux(const char *s){
     return sendto(udp_sock, s, strlen(s), 0, (struct sockaddr*)&slave_addr_aux, sizeof(slave_addr_aux));
 }
 
+int msg_app_tx_to_master(const char *s){
+    ESP_LOGI(TAG, "TX to MASTER: %s", s);
+    if (!master_known) return -1;
+    return sendto(udp_sock, s, strlen(s), 0, (struct sockaddr*)&master_addr,    sizeof(master_addr));
+}
+
 void msg_app_open_slave(void) {
     udp_sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
     if (udp_sock < 0) { ESP_LOGE(TAG, "socket failed"); vTaskDelay(portMAX_DELAY); }
@@ -127,6 +133,40 @@ static void msg_app_handle_master(const char *buf, const struct sockaddr_in *src
         last_temp_tick = xTaskGetTickCount();
         return;
     }
+    if (!strncmp(buf,"SW:",3)){
+        int sw = atoi(buf+3);
+        char line[32];
+        if(sw == 0 || sw == 1)
+        {
+            g_sw = sw;
+            ESP_LOGI(TAG,"Estado de switch (THERMAL): %d", g_sw);
+            int len = snprintf(line, sizeof(line), "SW:%d\n", sw);
+            if (len > 0) msg_app_tx_to_thermal(line);
+        }
+        else
+        {
+            g_sw = 0;
+            ESP_LOGE(TAG,"ingresa un valor valido del switch (THERMAL)");
+        }
+        return;
+    }
+    if (!strncmp(buf,"PIR:",4)){
+        int pir = atoi(buf+4);
+        char line[32];
+        if(pir == 0 || pir == 1)
+        {
+            g_pir = pir;
+            ESP_LOGI(TAG,"Estado de PIR (THERMAL): %d", g_pir);
+            int len = snprintf(line, sizeof(line), "PIR:%d\n", pir);
+            if (len > 0) msg_app_tx_to_thermal(line);
+        }
+        else
+        {
+            pir = 0;
+            ESP_LOGE(TAG,"ingresa un valor valido del pir (THERMAL)");
+        }
+        return;
+    }
 }
 
 #endif // MASTER
@@ -165,11 +205,12 @@ static void msg_app_handle_thermal(const char *buf, const struct sockaddr_in *sr
         int pir = atoi(buf+4);
         if(pir == 0 || pir == 1)
         {
+            g_pir = pir;
             ESP_LOGI(TAG,"Estado de PIR: %d", pir);
         }
         else
         {
-            pir = 0;
+            g_pir = 0;
             ESP_LOGE(TAG,"ingresa un valor valido del pir");
         }
     }

@@ -43,6 +43,7 @@ extern volatile int        g_pir;       // 0/1 (estado último leído)
 // + helpers de TX específicos
 int msg_app_tx_to_thermal(const char *s);
 int msg_app_tx_to_aux(const char *s);
+int msg_app_tx_to_master(const char *s);
 void msg_app_open_slave(void);
 void msg_app_open_master(void);
 void msg_app_task_rx(void *arg);

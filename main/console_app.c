@@ -58,7 +58,7 @@ void console_app_task(void *arg){
         else if (!strncmp(line, "cfg cooler ", 11)) {
             char *m = line + 11;
             for (char *p=m; *p; ++p) *p = (char)tolower((unsigned char)*p);
-            if (!strncmp(m,"temp",4)   && m[4]=='\0') msg_app_tx_to_thermal("CFG:COOLER_SRC=TEMP\n");
+            if      (!strncmp(m,"temp",4)   && m[4]=='\0') msg_app_tx_to_thermal("CFG:COOLER_SRC=TEMP\n");
             else if (!strncmp(m,"pir",3)    && m[3]=='\0') msg_app_tx_to_thermal("CFG:COOLER_SRC=PIR\n");
             else if (!strncmp(m,"switch",6) && m[6]=='\0') msg_app_tx_to_thermal("CFG:COOLER_SRC=SWITCH\n");
             else if (!strncmp(m,"off",3)    && m[3]=='\0') msg_app_tx_to_thermal("CFG:COOLER_SRC=OFF\n");
@@ -93,9 +93,15 @@ void console_app_task(void *arg){
     }
 }
 /*
-cfg led console
-cfg led switch
-cfg led pir
-led 1
-led 0
+LISTA DE COMANDOS:
+set <float>            ; setear nuevo setpoint de temperatura
+cfg led pir            ; configurar fuente de LED en AUX como PIR
+cfg led switch         ; configurar fuente de LED en AUX como SWITCH
+cfg led console        ; configurar fuente de LED en AUX como CONSOLE
+cfg cooler temp        ; configurar fuente de control de cooler en THERMAL como LM35
+cfg cooler pir         ; configurar fuente de control de cooler en THERMAL como PIR
+cfg cooler switch      ; configurar fuente de control de cooler en THERMAL como SWITCH
+cfg cooler off         ; apagar cooler
+led 0                  ; apagar LED desde consola
+led 1                  ; encender LED desde consola
 */
