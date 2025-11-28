@@ -22,7 +22,7 @@ static void wifi_sta_got_ip_handler(void* arg,
     xEventGroupSetBits((EventGroupHandle_t)arg, WIFI_GOT_IP_BIT);
 }
 
-static void wifi_app_stack_init(void) {
+static void wifi_app_init(void) {
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 #if MASTER == 1
@@ -48,7 +48,7 @@ static void wifi_app_config(wifi_mode_t mode, wifi_config_t *wifi_config) {
 }
 
 void wifi_app_init_softap(void) {
-    wifi_app_stack_init();
+    wifi_app_init();
 
     wifi_config_t wifi_config = { 0 };
     strcpy((char*)wifi_config.ap.ssid, AP_SSID);
@@ -66,7 +66,7 @@ void wifi_app_init_softap(void) {
 }
 
 void wifi_app_connect_sta(void){
-    wifi_app_stack_init();
+    wifi_app_init();
 
     wifi_config_t wifi_config = {0};
     strcpy((char*)wifi_config.sta.ssid, STA_SSID);

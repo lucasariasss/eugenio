@@ -12,8 +12,6 @@
 
 static const char *TAG = "aux_app";
 
-static TaskHandle_t s_aux_task_handle = NULL;
-
 /* Inicializar la aplicación auxiliar.
  * Devuelve ESP_OK si se creó la tarea correctamente. */
 esp_err_t aux_app_init(void)
@@ -71,7 +69,7 @@ void aux_app_poll_task(void *arg){
             int len = snprintf(line, sizeof(line), "PIR:%d\n", pir);
             if (len > 0) msg_app_tx_to_master(line);
         }
-        
+
         int sw  = !gpio_get_level(AUX_SW_GPIO);
         if (g_sw != sw)
         {

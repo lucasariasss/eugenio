@@ -238,11 +238,6 @@ void msg_app_task_rx(void *arg){
     struct sockaddr_in src;
     socklen_t slen=sizeof(src);
 
-#if MASTER == 1
-    const TickType_t ping_timeout = pdMS_TO_TICKS(1000); // si pasa 1s sin TEMP -> PING
-    TickType_t now;
-#endif // MASTER
-
     while (1){
         int n = recvfrom(udp_sock, buf, sizeof(buf)-1, 0, (struct sockaddr*)&src, &slen);
         if (n>0){
@@ -261,16 +256,6 @@ void msg_app_task_rx(void *arg){
             msg_app_handle_aux(buf, &src);
 #endif // AUX == 1
         }
-#if MASTER == 1
-        else {
-            now = xTaskGetTickCount();
-            bool stale = (last_temp_tick == 0) || ((now - last_temp_tick) > ping_timeout);
-            if (stale){
-                if (thermal_known) sendto(udp_sock,"PING:MASTER\n",12,0, (struct sockaddr*)&slave_addr_thermal,sizeof(slave_addr_thermal));
-                if (aux_known) sendto(udp_sock,"PING:MASTER\n",12,0, (struct sockaddr*)&slave_addr_aux,sizeof(slave_addr_aux));
-            }
-        }
-#endif // MASTER
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
