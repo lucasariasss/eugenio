@@ -17,6 +17,7 @@
 #include "esp_log.h"
 #include "esp_wifi.h"
 #include "lwip/netdb.h"
+#include "mdns.h"
 
 #include "app_nvs.h"
 #include "http_server.h"
@@ -65,6 +66,7 @@ static void wifi_app_event_handler(void *arg, esp_event_base_t event_base, int32
 		{
 		case WIFI_EVENT_AP_START:
 			ESP_LOGI(TAG, "WIFI_EVENT_AP_START");
+			wifi_app_start_mDNS("Eugenio001")
 			break;
 
 		case WIFI_EVENT_AP_STOP:
@@ -116,13 +118,23 @@ static void wifi_app_event_handler(void *arg, esp_event_base_t event_base, int32
 		{
 		case IP_EVENT_STA_GOT_IP:
 			ESP_LOGI(TAG, "IP_EVENT_STA_GOT_IP");
-
+	
+			wifi_app_start_mDNS("Eugenio001")
 			wifi_app_send_message(WIFI_APP_MSG_STA_CONNECTED_GOT_IP);
 
 			break;
 		}
 	}
 #endif // HAS_STA_MODE
+}
+
+void wifi_app_start_mDNS(const char *web_name)
+{
+    ESP_LOGI(TAG, "Inicializando mDNS: web_name=%s", web_name);
+
+    ESP_ERROR_CHECK(mdns_init());
+    ESP_ERROR_CHECK(mdns_hostname_set(web_name));                 // p.ej. "uccsimulador1"
+    ESP_ERROR_CHECK(mdns_instance_name_set("Simulador Eugenio"));
 }
 
 /**
