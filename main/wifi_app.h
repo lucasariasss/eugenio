@@ -17,7 +17,7 @@
 #include "freertos/FreeRTOS.h"
 
 //CONFIGURACION DE APLICACION WIFI
-#define WIFI_AP_SSID 			"Eugenio_AP"
+#define WIFI_AP_SSID 			"Eugenio001"
 #define WIFI_AP_PASSWORD		"password"
 #define WIFI_AP_CHANNEL			1
 #define WIFI_AP_SSID_HIDDEN		0				// 0=visible, 1=invisible
