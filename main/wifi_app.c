@@ -66,7 +66,7 @@ static void wifi_app_event_handler(void *arg, esp_event_base_t event_base, int32
 		{
 		case WIFI_EVENT_AP_START:
 			ESP_LOGI(TAG, "WIFI_EVENT_AP_START");
-			wifi_app_start_mDNS("Eugenio001")
+			wifi_app_start_mDNS()
 			break;
 
 		case WIFI_EVENT_AP_STOP:
@@ -87,6 +87,7 @@ static void wifi_app_event_handler(void *arg, esp_event_base_t event_base, int32
 
 		case WIFI_EVENT_STA_CONNECTED:
 			ESP_LOGI(TAG, "WIFI_EVENT_STA_CONNECTED");
+			wifi_app_start_mDNS()
 			break;
 
 		case WIFI_EVENT_STA_DISCONNECTED:
@@ -128,12 +129,12 @@ static void wifi_app_event_handler(void *arg, esp_event_base_t event_base, int32
 #endif // HAS_STA_MODE
 }
 
-void wifi_app_start_mDNS(const char *web_name)
+void wifi_app_start_mDNS()
 {
-    ESP_LOGI(TAG, "Inicializando mDNS: web_name=%s", web_name);
+    ESP_LOGI(TAG, "Inicializando mDNS: web_name=%s", WIFI_AP_SSID);
 
     ESP_ERROR_CHECK(mdns_init());
-    ESP_ERROR_CHECK(mdns_hostname_set(web_name));                 // p.ej. "uccsimulador1"
+    ESP_ERROR_CHECK(mdns_hostname_set(WIFI_AP_SSID));
     ESP_ERROR_CHECK(mdns_instance_name_set("Simulador Eugenio"));
 }
 
