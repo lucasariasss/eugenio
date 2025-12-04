@@ -66,7 +66,7 @@ static void wifi_app_event_handler(void *arg, esp_event_base_t event_base, int32
 		{
 		case WIFI_EVENT_AP_START:
 			ESP_LOGI(TAG, "WIFI_EVENT_AP_START");
-			wifi_app_start_mDNS()
+			wifi_app_start_mDNS();
 			break;
 
 		case WIFI_EVENT_AP_STOP:
@@ -87,7 +87,7 @@ static void wifi_app_event_handler(void *arg, esp_event_base_t event_base, int32
 
 		case WIFI_EVENT_STA_CONNECTED:
 			ESP_LOGI(TAG, "WIFI_EVENT_STA_CONNECTED");
-			wifi_app_start_mDNS()
+			wifi_app_start_mDNS();
 			break;
 
 		case WIFI_EVENT_STA_DISCONNECTED:

@@ -63,7 +63,7 @@ typedef struct wifi_app_queue_message
  * @return pdTrue si el mensaje se encoló; errQUEUE_FULL si la cola está llena.
  */
 
-void wifi_app_start_mDNS(const char *web_name);
+void wifi_app_start_mDNS();
 
 BaseType_t wifi_app_send_message(wifi_app_message_e msgID);
 
