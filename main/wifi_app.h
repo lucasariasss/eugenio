@@ -58,13 +58,15 @@ typedef struct wifi_app_queue_message
 } wifi_app_queue_message_t;
 
 /**
+ * @brief Inicializa la dns.
+ */
+void wifi_app_start_mDNS();
+
+/**
  * @brief Envía un mensaje a la cola de la aplicación Wi-Fi.
  * @param msgID Identificador del mensaje a enviar.
  * @return pdTrue si el mensaje se encoló; errQUEUE_FULL si la cola está llena.
  */
-
-void wifi_app_start_mDNS();
-
 BaseType_t wifi_app_send_message(wifi_app_message_e msgID);
 
 /**
