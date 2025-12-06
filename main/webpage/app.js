@@ -279,3 +279,52 @@ function disconnectWifi()
 	// actualiza la web
 	setTimeout("location.reload(true);", 2000); 
 }
+
+/* 5.3 . ESTADO DE LA CONEXION WIFI*/
+/*
+ * 5.3.1. Actualiza el estado de la conexion wifi en el header
+ */
+function setConnectionStatus(online) {
+    const dot  = document.getElementById('status-dot');
+    const text = document.getElementById('status-text');
+    if (!dot || !text) return;
+
+    dot.classList.remove('status-online', 'status-offline');
+
+    if (online) {
+        dot.classList.add('status-online');
+        text.textContent = 'Conectado';
+    } else {
+        dot.classList.add('status-offline');
+        text.textContent = 'Desconectado';
+    }
+}
+
+
+/* 
+ * 5.3.2. Inicia el monitor de conexion
+ */
+function startConnectionMonitor() {
+    const PING_INTERVAL_MS = 2000;
+
+    function pingServer() {
+        fetch('/webStatus.json?_=' + Date.now(), { cache: 'no-store' })
+            .then(resp => {
+                if (resp.ok) {
+                    setConnectionStatus(true);
+                } else {
+                    setConnectionStatus(false);
+                }
+            })
+            .catch(() => {
+                setConnectionStatus(false);
+            });
+    }
+
+    // Llamada inicial
+    pingServer();
+    // Pings periódicos
+    setInterval(pingServer, PING_INTERVAL_MS);
+}
+
+window.addEventListener('load', startConnectionMonitor);

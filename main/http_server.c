@@ -331,6 +331,18 @@ static esp_err_t http_server_uart_msg_json_handler(httpd_req_t *req)
 	return ESP_OK;
 }
 
+static esp_err_t http_server_web_status_json_handler(httpd_req_t *req)
+{
+	ESP_LOGI(TAG, "/webStatus.json solicitado");
+
+    const char *statusJSON = "{\"status\":\"ok\"}";
+
+	httpd_resp_set_type(req, "application/json");
+	httpd_resp_send(req, statusJSON, strlen(statusJSON));
+
+	return ESP_OK;
+}
+
 /**
  * @brief Devuelve en JSON la IP, máscara, gateway y SSID si hay conexión Wi-Fi.
  * @param req Solicitud HTTP recibida.
@@ -471,6 +483,7 @@ static httpd_handle_t http_server_configure(void)
 		http_server_register_uri_handler("/model.png", HTTP_GET, http_server_model_png_handler);
 		http_server_register_uri_handler("/logo.png", HTTP_GET, http_server_logo_png_handler);
 		http_server_register_uri_handler("/UARTmsg.json", HTTP_POST, http_server_uart_msg_json_handler);
+		http_server_register_uri_handler("/webStatus.json", HTTP_GET, http_server_web_status_json_handler);
 		http_server_register_uri_handler("/wifiConnect.json", HTTP_POST, http_server_wifi_connect_json_handler);
 		http_server_register_uri_handler("/wifiConnectStatus", HTTP_POST, http_server_wifi_connect_status_json_handler);
 		http_server_register_uri_handler("/wifiConnectInfo.json", HTTP_GET, http_server_get_wifi_connect_info_json_handler);

@@ -294,11 +294,34 @@ footer p{
     display:flex;
 }
 
+#connection-status {
+    position: fixed;      /* o relative, según tu layout */
+    top: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+}
 
+#status-text {
+    font-weight: bold;
+    color: var(--texto);
+}
 
+#status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid #333;
+    display: inline-block;
+}
 
+/* Estados */
+.status-online {
+    background-color: #2ecc71; /* verde */
+}
 
-
-
-
-
+.status-offline {
+    background-color: #e74c3c; /* rojo */
+}
