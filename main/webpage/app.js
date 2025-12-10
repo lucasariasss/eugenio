@@ -23,6 +23,7 @@ const mapaDeEnfermedades = {
 };
 
 /* 2. FUNCIONES DE INICIALIZACION.*/
+window.addEventListener('load', startConnectionMonitor);
 $(document).ready(function(){
 	// Solo pido info de WiFi si la página tiene la UI de WiFi
 	const hasWifiUI = $("#WiFiConnect").length || $("#ConnectInfo").length;
@@ -327,4 +328,3 @@ function startConnectionMonitor() {
     setInterval(pingServer, PING_INTERVAL_MS);
 }
 
-window.addEventListener('load', startConnectionMonitor);
