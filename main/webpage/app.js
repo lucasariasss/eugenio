@@ -1,6 +1,6 @@
 /* 1. GLOBALES*/
-var wifiConnectInterval = null;
-var configuracion_boton = 0
+let wifiConnectInterval = null;
+let configuracion_boton = 0;
 
 const mapaDeEnfermedades = {
 	"000": ["c1", "c2", "c3", "c4"],
@@ -81,7 +81,7 @@ function switchConfig()
  * 4.0.1. Manda la opcion seleccionada a la STM32
  */
 function send_uart(){
-	const selectedDisease = parseInt($('#selectedDis').val());
+	const selectedDisease = parseInt($('#selectedDis').val(), 10);
 	const data = JSON.stringify({ enfermedad: selectedDisease, timestamp: Date.now() });
 
 	$.ajax({
@@ -99,7 +99,7 @@ function send_uart(){
 */
 function showCircles(){
 	const selectedDisease = $('#selectedDis').val();
-	expuestos = document.getElementsByClassName('circulo-activo');
+	const expuestos = document.getElementsByClassName('circulo-activo');
 	const mostrarCirculos = mapaDeEnfermedades[selectedDisease];
 	while (expuestos.length > 0){
 		expuestos[0].classList.remove('circulo-activo');
@@ -129,18 +129,17 @@ function getSSID()
  */
 function checkCredentials()
 {
-	errorList = "";
-	credsOk = true;
+	let errorList = "";
+	let credsOk = true;
 	
-	selectedSSID = $("#connect_ssid").val();
-	pwd = $("#connect_pass").val();
+	const selectedSSID = $("#connect_ssid").val();
 	
-	if (selectedSSID == "")
+	if (selectedSSID === "")
 	{
 		errorList += "<h4 class='rd'>SSID obligatorio!</h4>";
 		credsOk = false;
 	}
-	if (credsOk == false)
+	if (!credsOk)
 	{
 		$("#wifi_connect_credentials_errors").html(errorList);
 	}
@@ -157,8 +156,8 @@ function checkCredentials()
 function connectWifi()
 {
 	// Get the SSID and password
-	selectedSSID = $("#connect_ssid").val();
-	pwd = $("#connect_pass").val();
+	const selectedSSID = $("#connect_ssid").val();
+	const pwd = $("#connect_pass").val();
 	
 	$.ajax({
 		url: '/wifiConnect.json',
@@ -177,7 +176,10 @@ function connectWifi()
  */
 function startWifiConnectStatusInterval()
 {
-	wifiConnectInterval = setInterval(getWifiConnectStatus, 2800);
+	if (wifiConnectInterval === null)
+	{
+		wifiConnectInterval = setInterval(getWifiConnectStatus, 2800);
+	}
 }
 
 /*
@@ -185,23 +187,23 @@ function startWifiConnectStatusInterval()
  */
 function getWifiConnectStatus()
 {
-	var xhr = new XMLHttpRequest();
-	var requestURL = "/wifiConnectStatus";
+	const xhr = new XMLHttpRequest();
+	const requestURL = "/wifiConnectStatus";
 	xhr.open('POST', requestURL, false);
 	xhr.send('wifi_connect_status');
 	
-	if (xhr.readyState == 4 && xhr.status == 200)
+	if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200)
 	{
-		var response = JSON.parse(xhr.responseText);
+		const response = JSON.parse(xhr.responseText);
 		
 		document.getElementById("wifi_connect_status").innerHTML = "Connecting...";
 		
-		if (response.wifi_connect_status == 2)
+		if (response.wifi_connect_status === 2)
 		{
 			document.getElementById("wifi_connect_status").innerHTML = "<h4 class='rd'>Failed to connect.</h4>";
 			stopWifiConnectStatusInterval();
 		}
-		else if (response.wifi_connect_status == 3)
+		else if (response.wifi_connect_status === 3)
 		{
 			document.getElementById("wifi_connect_status").innerHTML = "<h4 class='gr'>Connection success.</h4>";
 			stopWifiConnectStatusInterval();
@@ -215,7 +217,7 @@ function getWifiConnectStatus()
  */
 function stopWifiConnectStatusInterval()
 {
-	if (wifiConnectInterval != null)
+	if (wifiConnectInterval !== null)
 	{
 		clearInterval(wifiConnectInterval);
 		wifiConnectInterval = null;
@@ -229,16 +231,16 @@ function getConnectInfo()
 {
 	$.getJSON('/wifiConnectInfo.json', function(data)
 	{
-		$("#connected_ap_label").html("Conectado a: ");
+		$("#connected_ap_label").text("Conectado a: ");
 		$("#connected_ap").text(data.ap);
 		
-		$("#ip_address_label").html("Direcion IP: ");
+		$("#ip_address_label").text("Direcion IP: ");
 		$("#wifi_connect_ip").text(data["ip"]);
 		
-		$("#netmask_label").html("Netmask: ");
+		$("#netmask_label").text("Netmask: ");
 		$("#wifi_connect_netmask").text(data["netmask"]);
 		
-		$("#gateway_label").html("Gateway: ");
+		$("#gateway_label").text("Gateway: ");
 		$("#wifi_connect_gw").text(data["gw"]);
 
 		const disconnectBtn = document.getElementById('disconnect_wifi');
@@ -253,8 +255,8 @@ function getConnectInfo()
  */
 function showPassword()
 {
-	var x = document.getElementById("connect_pass");
-	if (x.type == "password")
+	const x = document.getElementById("connect_pass");
+	if (x.type === "password")
 	{
 		x.type = "text";
 	}
@@ -278,7 +280,7 @@ function disconnectWifi()
 		data: {'timestamp': Date.now()}
 	});
 	// actualiza la web
-	setTimeout("location.reload(true);", 2000); 
+	setTimeout(location.reload.bind(location, true), 2000);
 }
 
 /* 5.3 . ESTADO DE LA CONEXION WIFI*/

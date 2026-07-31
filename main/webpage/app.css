@@ -8,7 +8,7 @@
     --imageFullSize: 66.66vw;
     --circleSize: 6vw;
 }
-@media (width >= 480px) {
+@media (min-width: 480px) {
     :root {
         --circleSize: 3.5vw;
     }
@@ -66,7 +66,7 @@ h4 {
     flex-direction: column-reverse;
     justify-content: space-between;
 }
-@media (width >= 480px) {
+@media (min-width: 480px) {
     .simulation{
         flex-direction: row-reverse;
         height: calc(97vh - 130px);
@@ -80,7 +80,7 @@ h4 {
     padding-right: var(--paddingH);
     align-self: center;
 }
-@media (width >= 480px){
+@media (min-width: 480px) {
     .dis{
         width: calc(100vw - var(--imageFullSize));
     }
@@ -92,7 +92,7 @@ h4 {
     width: 100vw;
     align-content: center;
 }
-@media (width >= 480px) {
+@media (min-width: 480px) {
     .image{
         width: var(--imageFullSize);
     }        
@@ -146,38 +146,23 @@ h4 {
 	color: red;
 }
 
-#ap_ssid_label, #ap_ssid {
-	display:inline;
-}
-
-#ap_ssid {
-	color: #1d3557;
-}
-
-#connected_ap_label, #connected_ap {
+#ap_ssid_label,
+#ap_ssid,
+#connected_ap_label,
+#connected_ap,
+#ip_address_label,
+#netmask_label,
+#gateway_label,
+#wifi_connect_ip,
+#wifi_connect_netmask,
+#wifi_connect_gw {
     display: inline;
 }
 
-#ip_address_label, #netmask_label, #gateway_label {
-    display: inline;
-}
-
-#wifi_connect_ip, #wifi_connect_netmask, #wifi_connect_gw {
-    display: inline;
-}
-
-#connected_ap {
-	color: #1d3557;
-}
-
-#wifi_connect_ip {
-	color: #1d3557;
-}
-
-#wifi_connect_netmask {
-	color: #1d3557;
-}
-
+#ap_ssid,
+#connected_ap,
+#wifi_connect_ip,
+#wifi_connect_netmask,
 #wifi_connect_gw {
 	color: #1d3557;
 }
@@ -254,7 +239,7 @@ select {
     background-repeat: no-repeat;
     position: absolute;
 }
-@media (width >= 480px) {
+@media (min-width: 480px) {
     select{
         width: calc(101.7vw - var(--paddingH) - var(--imageFullSize));
     }        

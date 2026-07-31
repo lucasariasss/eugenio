@@ -1,6 +1,6 @@
-FROM espressif/idf
+FROM espressif/idf:v5.2.1
 
-ARG DEBIAN_FRONTEND=nointeractive
+ARG DEBIAN_FRONTEND=noninteractive
 ARG CONTAINER_USER=esp
 ARG USER_UID=1050
 ARG USER_GID=$USER_UID

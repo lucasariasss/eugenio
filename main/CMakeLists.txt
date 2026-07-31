@@ -22,3 +22,5 @@ idf_component_register(
         "webpage/logo.png"
         "webpage/model.png"
 )
+
+target_compile_definitions(${COMPONENT_LIB} PRIVATE HAS_STA_MODE=${HAS_STA_MODE})

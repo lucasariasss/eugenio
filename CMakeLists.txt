@@ -3,6 +3,13 @@
 cmake_minimum_required(VERSION 3.5)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-get_filename_component(ProjectId ${CMAKE_CURRENT_LIST_DIR} NAME)
-string(REPLACE " " "_" ProjectId ${ProjectId})
-project(${ProjectId})
+get_filename_component(ProjectId "${CMAKE_CURRENT_LIST_DIR}" NAME)
+string(REPLACE " " "_" ProjectId "${ProjectId}")
+
+set(HAS_STA_MODE "0" CACHE STRING "Build Wi-Fi support: 0 = AP only, 1 = AP + STA")
+set_property(CACHE HAS_STA_MODE PROPERTY STRINGS 0 1)
+if(NOT HAS_STA_MODE MATCHES "^[01]$")
+    message(FATAL_ERROR "HAS_STA_MODE must be 0 (AP only) or 1 (AP + STA)")
+endif()
+
+project("${ProjectId}")
